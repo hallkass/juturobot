@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professionaalne Areng OÜ - Täienduskoolitused</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        main {
+            margin-top: 80px;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(52, 152, 219, 0.8), rgba(44, 62, 80, 0.8)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23f0f8ff" width="1200" height="600"/><circle fill="%23e6f3ff" cx="200" cy="150" r="80"/><circle fill="%23cce7ff" cx="800" cy="300" r="100"/><circle fill="%23b3daff" cx="400" cy="450" r="60"/></svg>');
+            color: white;
+            text-align: center;
+            padding: 100px 0;
+            background-size: cover;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #c0392b;
+        }
+
+        .section {
+            padding: 60px 0;
+            background: white;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #2c3e50;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .service-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #3498db;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .service-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .service-card ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .service-card li {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .service-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            background: #ecf0f1;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3498db;
+            display: block;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .contact-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .contact-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .social-links {
+            margin: 1rem 0;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Professionaalne Areng OÜ</div>
+            <ul class="nav-links">
+                <li><a href="#avaleht">Avaleht</a></li>
+                <li><a href="#teenused">Teenused</a></li>
+                <li><a href="#meist">Meist</a></li>
+                <li><a href="#kontakt">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="avaleht" class="hero">
+            <div class="container">
+                <h1>Teadmised, mis viivad edasi</h1>
+                <p>Oleme kogenud täienduskoolituste pakkuja, kes aitab nii ettevõtetel kui üksikisikutel oma oskusi arendada ja karjääri edendada. Meie kursused on praktilised, kaasaegsed ja kohandatud teie vajadustele.</p>
+                <a href="#teenused" class="btn">Vaata kursusi</a>
+            </div>
+        </section>
+
+        <section id="teenused" class="section">
+            <div class="container">
+                <h2>Meie koolitused</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>IT ja Digitaalsed oskused</h3>
+                        <ul>
+                            <li>Microsoft Office kursused</li>
+                            <li>Sotsiaalmeedia turundus</li>
+                            <li>Veebilehtede loomine</li>
+                            <li>Andmeanalüüs ja visualiseerimine</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <h3>Ärioskused</h3>
+                        <ul>
+                            <li>Projektijuhtimine</li>
+                            <li>Müügitehnikad</li>
+                            <li>Klienditeenindus</li>
+                            <li>Juhtimisoskused</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <h3>Keeleõpe</h3>
+                        <ul>
+                            <li>Äriinglis keel</li>
+                            <li>Saksa keel algajatele</li>
+                            <li>Eesti keel välismaalastele</li>
+                            <li>Suhtlusoskused</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <h3>Erialased koolitused</h3>
+                        <ul>
+                            <li>Raamatupidamise alused</li>
+                            <li>Personalijuhtimine</li>
+                            <li>Turundus ja reklaam</li>
+                            <li>Kvaliteedijuhtimine</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="meist" class="section">
+            <div class="container">
+                <h2>Kes me oleme</h2>
+                <p style="text-align: center; font-size: 1.1rem; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    Professionaalne Areng OÜ on asutatud 2020. aastal eesmärgiga pakkuda kvaliteetseid täienduskoolitusi. Meie meeskond koosneb kogenud praktikatest ja õppejõududest, kel on aastatepikkune kogemus oma valdkondades.
+                </p>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        Koolitatud inimest
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">95%</span>
+                        Rahulolu määr
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">15+</span>
+                        Erinevat kursust
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        Partnerettevõtet
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 2rem; border-radius: 10px; margin: 2rem 0;">
+                    <h3 style="color: #2c3e50; margin-bottom: 1rem;">Meie põhimõtted:</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #27ae60; font-weight: bold;">✓</span>
+                            Kvaliteet enne kogust
+                        </li>
+                        <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #27ae60; font-weight: bold;">✓</span>
+                            Praktiline lähenemine
+                        </li>
+                        <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #27ae60; font-weight: bold;">✓</span>
+                            Pidev areng ja uuenemine
+                        </li>
+                        <li style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #27ae60; font-weight: bold;">✓</span>
+                            Kliendikeskne teenindus
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="kontakt" class="section">
+            <div class="container">
+                <h2>Võta meiega ühendust</h2>
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <h3>Kontaktandmed</h3>
+                        <p><strong>Telefon:</strong> +372 123 4567</p>
+                        <p><strong>E-post:</strong> info@professionaalneareng.ee</p>
+                        <p><strong>Aadress:</strong> Tallinna tn 10, 10145 Tallinn</p>
+                        <p><strong>Reg. kood:</strong> 12345678</p>
+                    </div>
+                    <div class="contact-card">
+                        <h3>Tööaeg</h3>
+                        <p><strong>E-R:</strong> 9:00-17:00</p>
+                        <p><strong>Laupäev:</strong> 10:00-14:00</p>
+                        <p><strong>Pühapäev:</strong> suletud</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="social-links">
+                <a href="#" aria-label="Facebook">📘</a>
+                <a href="#" aria-label="LinkedIn">💼</a>
+                <a href="#" aria-label="Instagram">📷</a>
+            </div>
+            <p>&copy; 2025 Professionaalne Areng OÜ. Kõik õigused kaitstud.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(44, 62, 80, 0.95)';
+            } else {
+                header.style.background = 'linear-gradient(135deg, #2c3e50, #3498db)';
+            }
+        });
+    </script>
+</body>
+</html>

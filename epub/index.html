@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EPUB-raamatu tegija</title>
 <link rel="stylesheet" href="../epub-raamatu-tegija/styles.css">
+<link rel="stylesheet" href="../epub-raamatu-tegija/enhancements.css">
 </head>
 <body>
 <div class="wrap">
   <div class="hero">
     <div>
       <h1>EPUB-raamatu tegija</h1>
-      <p>Koosta pealkirja, kaanepildi, peatükkide ja piltidega EPUB otse brauseris. Võid sisestada lood käsitsi või importida märgistatud TXT- või DOCX-faili.</p>
+      <p>Koosta pealkirja, kaanepildi, peatükkide ja piltidega EPUB otse brauseris. Võid sisestada lood käsitsi või importida TXT-, DOCX- või olemasoleva EPUB-faili ja seda edasi toimetada.</p>
     </div>
     <div class="badge">Kõik toimub sinu brauseris</div>
   </div>
@@ -34,9 +35,9 @@
 
     <aside class="side">
       <section class="card">
-        <h3>Impordi TXT või DOCX</h3>
-        <div class="drop" id="dropZone"><strong>Lohista failid siia</strong><span class="hint">või vali TXT/DOCX ja vajadusel pildifailid</span><input id="importFiles" type="file" multiple accept=".txt,.docx,image/*"></div>
-        <div class="hint">DOCX-ist püütakse kaasa võtta ka dokumendis olevad pildid. TXT puhul saad valida samal ajal pildifailid, mille nimed on tekstis märgitud.</div><div class="sep"></div>
+        <h3>Impordi EPUB, TXT või DOCX</h3>
+        <div class="drop" id="dropZone"><strong>Lohista failid siia</strong><span class="hint">EPUB-i saad uuesti avada ja edasi toimetada</span><input id="importFiles" type="file" multiple accept=".epub,.txt,.docx,image/*"></div>
+        <div class="hint">EPUB-ist tuuakse võimalusel sisse pealkiri, autor, kaas, peatükid ja pildid. Keerukas algne kujundus võib muutuda lihtsamaks. DOCX-ist püütakse kaasa võtta dokumendis olevad pildid. TXT puhul saad valida samal ajal ka tekstis märgitud pildifailid.</div><div class="sep"></div>
         <div class="markup">#pealkiri Minu raamatu pealkiri
 #autor Eesnimi Perekonnanimi
 #keel et
@@ -60,12 +61,18 @@ Teise loo tekst...</div><div id="importStatus" class="status"></div>
         <a class="btn full" style="margin-top:9px;display:block;text-align:center;text-decoration:none;background:#ff9900;border-color:#e88b00;color:#171717" href="https://kdp.amazon.com/bookshelf" target="_blank" rel="noopener noreferrer">Pane raamat Amazonis müüki →</a>
         <div class="hint" style="margin-top:7px">Avab Amazon Kindle Direct Publishingu (KDP). Laadi seal üles selle lehega loodud EPUB, lisa müügiandmed ja hind ning avalda raamat.</div>
         <div id="exportStatus" class="status"></div>
-        <div class="note" style="margin-top:12px">Peatüki sees olev pilt paigutatakse sinna, kus tekstiväljas asub märgis <span class="kbd">[[PILT:…]]</span>. Nupu „Lisa pilt” kasutamisel lisatakse märgis automaatselt kursori asukohta.</div>
+        <div class="note" style="margin-top:12px">Pilte saab lisada nupuga, lohistada kettalt otse peatüki tekstikasti või proovida lohistada veebilehelt/Facebookist. Kui veebileht blokeerib otselaadimise, kasuta „Copy image” + Ctrl/Cmd+V või salvesta pilt esmalt kettale. Pilt kopeeritakse EPUB-faili sisse.</div>
       </section>
     </aside>
   </div>
-  <div class="footer">Üks HTML-fail, serverit ega andmebaasi ei ole vaja.</div>
+  <div class="footer">Serverit ega andmebaasi ei ole vaja — raamat koostatakse sinu brauseris.</div>
 </div>
 <div class="modal" id="previewModal"><div class="preview-shell"><button class="btn preview-close" id="closePreview" type="button">Sulge</button><div class="book-preview" id="bookPreview"></div></div></div>
-<script src="../epub-raamatu-tegija/app-core.js"></script><script src="../epub-raamatu-tegija/app-ui.js"></script><script src="../epub-raamatu-tegija/app-docx.js"></script><script src="../epub-raamatu-tegija/app-epub.js"></script><script src="../epub-raamatu-tegija/app-main.js"></script>
+<script src="../epub-raamatu-tegija/app-core.js"></script>
+<script src="../epub-raamatu-tegija/app-ui.js"></script>
+<script src="../epub-raamatu-tegija/app-images.js"></script>
+<script src="../epub-raamatu-tegija/app-docx.js"></script>
+<script src="../epub-raamatu-tegija/app-epub-import.js"></script>
+<script src="../epub-raamatu-tegija/app-epub.js"></script>
+<script src="../epub-raamatu-tegija/app-main.js"></script>
 </body></html>

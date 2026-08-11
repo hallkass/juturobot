@@ -3,14 +3,47 @@
    ========================================================= */
 
 function insertImageAssetsAt(ch,assets,start,end){
-  if(!assets.length)return 0;
-  let tokenText="";
-  for(const asset of assets){
+  if(!assets.length)return {count:0,caret:start};
+
+  // Pilt hoitakse omaette real. Pärast viimast pilti jääb vähemalt üks
+  // reavahetus, et järgmise pildi saaks kohe samasse kohta järjest lohistada.
+  const before=ch.body.slice(0,start);
+  const after=ch.body.slice(end);
+  const prefix=before && !before.endsWith("\n") ? "\n\n" : "";
+  const tokens=assets.map(asset=>{
     ch.images.push(asset);
-    tokenText+=(tokenText?"\n\n":"")+`[[PILT:${asset.id}]]`;
-  }
-  ch.body=ch.body.slice(0,start)+tokenText+ch.body.slice(end);
-  return assets.length;
+    return `[[PILT:${asset.id}]]`;
+  }).join("\n\n");
+  const suffix=after.startsWith("\n") ? "\n" : "\n\n";
+  const insertion=prefix+tokens+suffix;
+
+  ch.body=before+insertion+after;
+  return {count:assets.length,caret:before.length+insertion.length};
+}
+
+function restoreEditorAfterRender(ch,oldTextarea,caret){
+  const textareaScrollTop=oldTextarea?.scrollTop||0;
+  const textareaScrollLeft=oldTextarea?.scrollLeft||0;
+  const pageX=window.scrollX;
+  const pageY=window.scrollY;
+
+  renderChapters();
+
+  const restore=()=>{
+    const fresh=document.querySelector(`.chapter[data-id="${ch.id}"] .ch-body`);
+    if(!fresh)return;
+    const pos=Math.max(0,Math.min(caret,fresh.value.length));
+    try{fresh.focus({preventScroll:true})}catch(e){fresh.focus()}
+    fresh.setSelectionRange(pos,pos);
+    fresh.scrollTop=textareaScrollTop;
+    fresh.scrollLeft=textareaScrollLeft;
+    window.scrollTo(pageX,pageY);
+  };
+
+  // Brauserid võivad pärast focus()/selection muutmist ühe kaadri võrra
+  // kerimisasendit korrigeerida. Taastame positsiooni kohe ja järgmisel kaadril.
+  restore();
+  requestAnimationFrame(restore);
 }
 
 function webImageName(url,type=""){
@@ -108,7 +141,8 @@ function enhanceChapterImageDrops(){
         const start=ta.selectionStart??ch.body.length,end=ta.selectionEnd??start;
         try{
           const asset=await fetchWebImage(raw.trim());
-          insertImageAssetsAt(ch,[asset],start,end);renderChapters();
+          const result=insertImageAssetsAt(ch,[asset],start,end);
+          restoreEditorAfterRender(ch,ta,result.caret);
         }catch(err){alert(err.message)}
       });
       row.insertBefore(webBtn,row.querySelector(".hint")||null);
@@ -120,7 +154,7 @@ function enhanceChapterImageDrops(){
     ta.addEventListener("dragover",ev=>{
       if(transferHasPossibleImage(ev.dataTransfer)){
         ev.preventDefault();if(ev.dataTransfer)ev.dataTransfer.dropEffect="copy";
-        ta.classList.add("image-drop-target");ta.focus({preventScroll:true});
+        ta.classList.add("image-drop-target");
       }
     });
     ta.addEventListener("dragleave",()=>ta.classList.remove("image-drop-target"));
@@ -131,7 +165,8 @@ function enhanceChapterImageDrops(){
       try{
         const assets=await assetsFromTransfer(ev.dataTransfer);
         if(!assets.length){alert("Lohistatud objektist ei leitud pilti.");return}
-        insertImageAssetsAt(ch,assets,start,end);renderChapters();
+        const result=insertImageAssetsAt(ch,assets,start,end);
+        restoreEditorAfterRender(ch,ta,result.caret);
       }catch(err){alert(err.message)}
     });
 
@@ -144,7 +179,8 @@ function enhanceChapterImageDrops(){
       try{
         const assets=await assetsFromTransfer(ev.clipboardData);
         if(!assets.length){alert("Lõikelaualt ei leitud pilti.");return}
-        insertImageAssetsAt(ch,assets,start,end);renderChapters();
+        const result=insertImageAssetsAt(ch,assets,start,end);
+        restoreEditorAfterRender(ch,ta,result.caret);
       }catch(err){alert(err.message)}
     });
   }

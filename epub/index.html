@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPUB-raamatu tegija</title>
+<link rel="stylesheet" href="../epub-raamatu-tegija/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>EPUB-raamatu tegija</h1>
+      <p>Koosta pealkirja, kaanepildi, peatükkide ja piltidega EPUB otse brauseris. Võid sisestada lood käsitsi või importida märgistatud TXT- või DOCX-faili.</p>
+    </div>
+    <div class="badge">Kõik toimub sinu brauseris</div>
+  </div>
+
+  <div class="grid">
+    <main>
+      <section class="card">
+        <h2>1. Raamatu andmed</h2>
+        <div class="fields">
+          <div>
+            <label for="bookTitle">Raamatu pealkiri</label>
+            <input id="bookTitle" type="text" placeholder="Näiteks: 25 000 maale">
+          </div>
+          <div>
+            <label for="author">Autor</label>
+            <input id="author" type="text" placeholder="Autori nimi (soovi korral)">
+          </div>
+          <div>
+            <label for="language">Keel</label>
+            <select id="language">
+              <option value="et" selected>Eesti (et)</option>
+              <option value="en">English (en)</option>
+              <option value="ru">Русский (ru)</option>
+              <option value="fi">Suomi (fi)</option>
+              <option value="de">Deutsch (de)</option>
+              <option value="fr">Français (fr)</option>
+            </select>
+          </div>
+          <div>
+            <label for="fileName">EPUB-faili nimi</label>
+            <input id="fileName" type="text" placeholder="raamat.epub">
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="coverbox">
+          <div class="coverpreview" id="coverPreview">Kaanepilt puudub</div>
+          <div>
+            <label for="coverInput">Kaanepilt</label>
+            <input id="coverInput" type="file" accept="image/*">
+            <div class="hint">Soovitus: püstine JPG või PNG. Kui kaant ei lisa, tehakse EPUB tiitellehega.</div>
+            <div class="row" style="margin-top:8px">
+              <button class="btn small danger" id="removeCover" type="button">Eemalda kaanepilt</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. Peatükid</h2>
+        <div id="chapters"></div>
+        <button class="btn primary" id="addChapter" type="button">+ Lisa järgmine peatükk</button>
+      </section>
+    </main>
+
+    <aside class="side">
+      <section class="card">
+        <h3>Impordi TXT või DOCX</h3>
+        <div class="drop" id="dropZone">
+          <strong>Lohista failid siia</strong>
+          <span class="hint">või vali TXT/DOCX ja vajadusel pildifailid</span>
+          <input id="importFiles" type="file" multiple accept=".txt,.docx,image/*">
+        </div>
+        <div class="hint">DOCX-ist püütakse kaasa võtta ka dokumendis olevad pildid. TXT puhul saad valida samal ajal pildifailid, mille nimed on tekstis märgitud.</div>
+        <div class="sep"></div>
+        <div class="markup">#pealkiri Minu raamatu pealkiri
+#autor Eesnimi Perekonnanimi
+#keel et
+#kaanepilt cover.jpg
+
+#peatükk Esimese loo pealkiri
+Siia tuleb esimese loo tekst.
+
+#pilt foto1.jpg | Soovi korral pildiallkiri
+
+Tekst jätkub siit.
+
+#peatükk Teise loo pealkiri
+Teise loo tekst...</div>
+        <div id="importStatus" class="status"></div>
+      </section>
+
+      <section class="card">
+        <h3>3. Valmis raamat</h3>
+        <button class="btn full" id="previewBook" type="button">Eelvaade</button>
+        <button class="btn primary full" style="margin-top:9px" id="exportEpub" type="button">Loo EPUB ja laadi alla</button>
+        <div id="exportStatus" class="status"></div>
+        <div class="note" style="margin-top:12px">
+          Peatüki sees olev pilt paigutatakse sinna, kus tekstiväljas asub märgis <span class="kbd">[[PILT:…]]</span>. Nupu „Lisa pilt” kasutamisel lisatakse märgis automaatselt kursori asukohta.
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="footer">Üks HTML-fail, serverit ega andmebaasi ei ole vaja.</div>
+</div>
+
+<div class="modal" id="previewModal">
+  <div class="preview-shell">
+    <button class="btn preview-close" id="closePreview" type="button">Sulge</button>
+    <div class="book-preview" id="bookPreview"></div>
+  </div>
+</div>
+
+<script src="../epub-raamatu-tegija/app-core.js"></script>
+<script src="../epub-raamatu-tegija/app-ui.js"></script>
+<script src="../epub-raamatu-tegija/app-docx.js"></script>
+<script src="../epub-raamatu-tegija/app-epub.js"></script>
+<script src="../epub-raamatu-tegija/app-main.js"></script>
+</body>
+</html>

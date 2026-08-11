@@ -21,9 +21,48 @@ function insertImageAssetsAt(ch,assets,start,end){
   return {count:assets.length,caret:before.length+insertion.length};
 }
 
+// Arvutab kursori tegeliku vertikaalse asukoha textarea sees, arvestades ka
+// Chrome'i automaatset reamurdmist. Selleks tehakse hetkeks nähtamatu peegel.
+function caretOffsetTop(textarea,caret){
+  const cs=getComputedStyle(textarea);
+  const mirror=document.createElement("div");
+  const props=[
+    "fontFamily","fontSize","fontWeight","fontStyle","letterSpacing","lineHeight",
+    "textTransform","textIndent","wordSpacing","tabSize","paddingTop","paddingRight",
+    "paddingBottom","paddingLeft","borderTopWidth","borderRightWidth","borderBottomWidth",
+    "borderLeftWidth","boxSizing"
+  ];
+  for(const p of props)mirror.style[p]=cs[p];
+  mirror.style.position="absolute";
+  mirror.style.visibility="hidden";
+  mirror.style.pointerEvents="none";
+  mirror.style.left="-100000px";
+  mirror.style.top="0";
+  mirror.style.width=textarea.offsetWidth+"px";
+  mirror.style.whiteSpace="pre-wrap";
+  mirror.style.overflowWrap="break-word";
+  mirror.style.wordBreak="break-word";
+  mirror.style.overflow="hidden";
+
+  const before=document.createTextNode(textarea.value.slice(0,caret));
+  const marker=document.createElement("span");
+  marker.textContent="\u200b";
+  mirror.append(before,marker);
+  document.body.appendChild(mirror);
+  const top=marker.offsetTop;
+  mirror.remove();
+  return top;
+}
+
+function scrollTextareaToCaret(textarea,caret){
+  // Hoia viimati lisatud pilt/kursor nähtava ala keskosa lähedal. Nii saab
+  // kasutaja kohe järgmise pildi lohistada, ilma tekstis tagasi otsimata.
+  const caretTop=caretOffsetTop(textarea,caret);
+  const target=Math.max(0,caretTop-textarea.clientHeight*0.58);
+  textarea.scrollTop=target;
+}
+
 function restoreEditorAfterRender(ch,oldTextarea,caret){
-  const textareaScrollTop=oldTextarea?.scrollTop||0;
-  const textareaScrollLeft=oldTextarea?.scrollLeft||0;
   const pageX=window.scrollX;
   const pageY=window.scrollY;
 
@@ -35,15 +74,15 @@ function restoreEditorAfterRender(ch,oldTextarea,caret){
     const pos=Math.max(0,Math.min(caret,fresh.value.length));
     try{fresh.focus({preventScroll:true})}catch(e){fresh.focus()}
     fresh.setSelectionRange(pos,pos);
-    fresh.scrollTop=textareaScrollTop;
-    fresh.scrollLeft=textareaScrollLeft;
+    scrollTextareaToCaret(fresh,pos);
+    // Tekstiala kerib ise viimati lisatud pildi juurde, kuid kogu veebileht
+    // jääb samasse kohta ega hüppa Chrome'is fookuse tõttu üles.
     window.scrollTo(pageX,pageY);
   };
 
-  // Brauserid võivad pärast focus()/selection muutmist ühe kaadri võrra
-  // kerimisasendit korrigeerida. Taastame positsiooni kohe ja järgmisel kaadril.
   restore();
   requestAnimationFrame(restore);
+  setTimeout(restore,0);
 }
 
 function webImageName(url,type=""){

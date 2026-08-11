@@ -1,0 +1,73 @@
+:root{
+  --bg:#f4f1ea;--paper:#fffdf8;--ink:#24211d;--muted:#6b655d;--line:#d8d1c6;
+  --accent:#7b3f1d;--accent2:#a86438;--soft:#eee7dc;--danger:#a42f2f;--ok:#276b45;
+  --shadow:0 12px 36px rgba(45,35,25,.09);--radius:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 18px 70px}
+.hero{display:flex;gap:22px;justify-content:space-between;align-items:flex-end;margin-bottom:20px}
+.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,5vw,56px);line-height:.98;margin:0 0 8px;letter-spacing:-.03em}
+.hero p{margin:0;color:var(--muted);max-width:730px}
+.badge{background:#e8dfd2;border:1px solid #d2c5b4;padding:8px 12px;border-radius:999px;color:#594b3e;font-size:13px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.side{position:static!important}.hero{align-items:flex-start;flex-direction:column}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card+.card{margin-top:16px}
+.card h2,.card h3{font-family:Georgia,"Times New Roman",serif;margin:0 0 14px}
+.card h2{font-size:24px}.card h3{font-size:19px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.fields{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:700;color:#554f48;margin-bottom:6px}
+input[type=text],input[type=file],select,textarea{width:100%;border:1px solid #cfc7bb;border-radius:10px;background:#fff;padding:10px 11px;color:var(--ink);outline:none}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(168,100,56,.12)}
+textarea{min-height:220px;resize:vertical;font-family:Georgia,"Times New Roman",serif;font-size:16px;line-height:1.55}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid #c8bdae;background:#fff;border-radius:10px;padding:9px 12px;color:#3e372f;font-weight:700}
+.btn:hover{background:#f7f1e8}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#653219}
+.btn.danger{color:var(--danger);border-color:#e3bcbc}
+.btn.small{padding:6px 9px;font-size:12px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.full{width:100%;padding:13px}
+.sep{height:1px;background:var(--line);margin:16px 0}
+.coverbox{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:start}
+.coverpreview{width:112px;aspect-ratio:2/3;border-radius:9px;border:1px dashed #bdb3a5;background:#f6f1e9;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#81786e;font-size:12px;text-align:center;padding:8px}
+.coverpreview img{width:100%;height:100%;object-fit:cover}
+.chapter{position:relative}
+.chapter-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.chapter-number{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--soft);font-weight:800;color:#5e5144;flex:0 0 auto}
+.chapter-title{font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:700}
+.chapter-tools{margin-left:auto;display:flex;gap:5px}
+.image-tray{display:flex;gap:10px;overflow:auto;padding:4px 1px 8px;margin-top:10px}
+.thumb{flex:0 0 170px;border:1px solid var(--line);border-radius:10px;padding:8px;background:#faf7f1}
+.thumb img{width:100%;height:95px;object-fit:cover;border-radius:6px;display:block;background:#eee}
+.thumb input{margin-top:7px}
+.thumb .name{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}
+.side{position:sticky;top:18px}
+.markup{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:#292622;color:#f6efe6;padding:12px;border-radius:10px;white-space:pre-wrap;line-height:1.55}
+.status{font-size:13px;padding:10px;border-radius:9px;background:#f2eee7;color:#5f574e;margin-top:10px;display:none}
+.status.show{display:block}.status.ok{background:#e8f4ec;color:var(--ok)}.status.err{background:#f9e8e8;color:var(--danger)}
+.drop{border:2px dashed #c7b9a8;border-radius:12px;padding:17px;text-align:center;background:#fbf8f2;transition:.15s}
+.drop.drag{border-color:var(--accent2);background:#f2e7d9}
+.drop strong{display:block;margin-bottom:5px}
+.drop input{margin-top:9px}
+.note{background:#f1e8db;border-left:4px solid var(--accent2);padding:10px 12px;border-radius:0 9px 9px 0;font-size:13px;color:#584c40}
+.modal{position:fixed;inset:0;background:rgba(30,25,20,.6);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:28px;overflow:auto}
+.modal.show{display:flex}
+.preview-shell{width:min(780px,100%);background:#fdfbf5;border-radius:15px;box-shadow:0 20px 80px rgba(0,0,0,.3);padding:28px 38px;position:relative}
+.preview-close{position:sticky;top:0;float:right;z-index:2}
+.book-preview{font-family:Georgia,"Times New Roman",serif;line-height:1.62}
+.book-preview .cover{max-width:300px;margin:20px auto;text-align:center}
+.book-preview .cover img{max-width:100%;max-height:440px}
+.book-preview h1{text-align:center;font-size:38px;margin-top:50px}.book-preview .author{text-align:center;font-style:italic}
+.book-preview h2{font-size:28px;margin-top:56px;padding-top:12px;border-top:1px solid #ddd}
+.book-preview p{text-indent:1.3em;margin:.65em 0}.book-preview p:first-of-type{text-indent:0}
+.book-preview figure{margin:22px auto;text-align:center}.book-preview figure img{max-width:100%;max-height:600px}.book-preview figcaption{font-size:13px;color:#666;font-style:italic}
+.footer{font-size:12px;color:var(--muted);text-align:center;margin-top:22px}
+.kbd{font-family:ui-monospace,monospace;background:#eee8df;border:1px solid #d6cec2;border-bottom-width:2px;padding:1px 5px;border-radius:5px;font-size:11px}

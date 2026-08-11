@@ -18,17 +18,30 @@ $("#previewModal").addEventListener("click",e=>{if(e.target.id==="previewModal")
 
 async function handleImport(files){
   clearStatus(statusImport);const list=[...files];
-  const source=list.find(f=>/\.docx$/i.test(f.name))||list.find(f=>/\.txt$/i.test(f.name));
-  if(!source){showStatus(statusImport,"Vali vähemalt üks .txt või .docx fail.","err");return}
+  const source=list.find(f=>/\.epub$/i.test(f.name))||list.find(f=>/\.docx$/i.test(f.name))||list.find(f=>/\.txt$/i.test(f.name));
+  if(!source){showStatus(statusImport,"Vali vähemalt üks .epub, .docx või .txt fail.","err");return}
   if((state.chapters.length&&state.chapters.some(c=>c.body.trim()||c.images.length))||$("#bookTitle").value.trim()){
-    if(!confirm("Import asendab praegused peatükid ja võib asendada raamatu andmed. Kas jätkan?"))return;
+    if(!confirm("Import asendab praegused peatükid ja raamatu andmed. Kas jätkan?"))return;
   }
-  const extras=list.filter(f=>f!==source&&f.type.startsWith("image/"));showStatus(statusImport,"Impordin faili…");
+  const extras=list.filter(f=>f!==source&&f.type.startsWith("image/"));
+  showStatus(statusImport,/\.epub$/i.test(source.name)?"Avan EPUB-i toimetamiseks…":"Impordin faili…");
   try{
-    const result=/\.docx$/i.test(source.name)?await importDocx(source,extras):await importTxt(source,extras);
+    let result;
+    if(/\.epub$/i.test(source.name))result=await importEpub(source);
+    else if(/\.docx$/i.test(source.name))result=await importDocx(source,extras);
+    else result=await importTxt(source,extras);
+
+    // Eelmise raamatu kaas ei tohi uude imporditud raamatusse jääda.
+    if(state.cover)setCover(null);
     applyImported(result);
-    const miss=result.missing?.length?` Puudu jäid pildid: ${[...new Set(result.missing)].join(", ")}.`:"";
-    showStatus(statusImport,`Import valmis: ${result.chapters.length} peatükki.${miss}`,"ok");
+
+    if(/\.epub$/i.test(source.name)){
+      $("#fileName").dataset.manual="1";
+      $("#fileName").value=source.name;
+    }
+    const miss=result.missing?.length?` Mõnda pilti ei õnnestunud importida: ${[...new Set(result.missing)].slice(0,5).join(", ")}${result.missing.length>5?" …":""}.`:"";
+    const extra=result.importedFromEpub?" EPUB on nüüd redaktoris ja saad seda edasi muuta ning uuesti alla laadida. Keerukas algne kujundus võib importimisel lihtsustuda.":"";
+    showStatus(statusImport,`Import valmis: ${result.chapters.length} peatükki.${extra}${miss}`,"ok");
   }catch(err){console.error(err);showStatus(statusImport,"Import ebaõnnestus: "+err.message,"err")}
 }
 $("#importFiles").addEventListener("change",e=>{if(e.target.files?.length)handleImport(e.target.files)});

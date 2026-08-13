@@ -33,6 +33,26 @@ function epubDecodeDataImage(src){
   return new Blob([bytes],{type});
 }
 
+function epubLooksLikeImagePageTitle(title,rec){
+  const t=String(title||"").trim().toLowerCase();
+  const source=String((rec?.id||"")+" "+(rec?.href||"")).toLowerCase();
+  if(!t)return true;
+  if(/^(pilt|pildid|foto|fotod|image|images|photo|photos|figure|figuur|illustration|illustratsioon)(\s*[-–—:]?\s*\d+)?$/.test(t))return true;
+  if(/(^|[\/_-])(img|image|picture|photo|figure|illustration)([\/_\.\d-]|$)/.test(source))return true;
+  return false;
+}
+
+function mergeImportedImagePage(target,page,prepend=false){
+  if(!target||!page)return;
+  for(const img of page.images||[]){
+    if(!target.images.includes(img))target.images.push(img);
+  }
+  const body=String(page.body||"").trim();
+  if(!body)return;
+  if(prepend)target.body=body+(target.body.trim()?"\n\n"+target.body.trim():"");
+  else target.body=(target.body.trim()?target.body.trim()+"\n\n":"")+body;
+}
+
 async function importEpub(source){
   const zr=new SimpleZipReader(new Uint8Array(await source.arrayBuffer()));
   const containerBytes=await zr.get("META-INF/container.xml");
@@ -93,6 +113,7 @@ async function importEpub(source){
 
   const chapters=[];
   const missing=[];
+  const pendingImagePages=[];
 
   async function loadChapterImage(src,xhtmlPath,caption,cache){
     src=String(src||"").trim();if(!src)return null;
@@ -129,7 +150,8 @@ async function importEpub(source){
     const body=epubFirst(doc,"body")||doc.body;if(!body)return null;
     const headings=[...body.getElementsByTagName("*")].filter(x=>/^h[1-3]$/.test(epubLocalName(x)));
     const heading=headings[0]||null;
-    const title=(heading?.textContent||doc.querySelector?.("title")?.textContent||"").trim()||`Peatükk ${index+1}`;
+    const documentTitle=(doc.querySelector?.("title")?.textContent||"").trim();
+    const title=(heading?.textContent||documentTitle||"").trim()||`Peatükk ${index+1}`;
     const ch=newChapter(title,"");
     const imageCache=new Map();
 
@@ -170,7 +192,13 @@ async function importEpub(source){
     let editable=await walk(body);
     editable=editable.replace(/[ \t]+\n/g,"\n").replace(/\n[ \t]+/g,"\n").replace(/[ \t]{2,}/g," ").replace(/\n{3,}/g,"\n\n").trim();
     ch.body=editable;
-    return ch;
+
+    const textWithoutImages=editable.replace(/\[\[PILT:[^\]]+\]\]/g,"").replace(/\s+/g," ").trim();
+    const hasImages=ch.images.length>0&&/\[\[PILT:[^\]]+\]\]/.test(editable);
+    const visibleHeading=!!heading&&String(heading.textContent||"").trim().length>0;
+    const imageOnly=hasImages&&!textWithoutImages&&(!visibleHeading||epubLooksLikeImagePageTitle(title,rec));
+
+    return {ch,imageOnly};
   }
 
   for(let i=0;i<spine.length;i++){
@@ -178,10 +206,34 @@ async function importEpub(source){
     if(!/application\/(xhtml\+xml|html)|text\/html/i.test(rec.mediaType||"application/xhtml+xml"))continue;
     // Meie enda genereeritud EPUB-is on esimene spine'i kirje tiitelleht.
     if(i===0&&spine.length>1&&/title|cover/i.test(rec.id+" "+rec.href))continue;
-    const ch=await xhtmlToChapter(rec,i);
-    if(ch&&(ch.body.trim()||ch.title.trim()))chapters.push(ch);
+
+    const parsed=await xhtmlToChapter(rec,i);
+    if(!parsed)continue;
+    const ch=parsed.ch;
+
+    if(parsed.imageOnly){
+      // Vanemate EPUB-ide eksportijad teevad vahel igast pildist eraldi XHTML-lehe.
+      // Redaktoris ei ole need eraldi peatükid: liidame need naaberpeatüki sisse.
+      if(chapters.length)mergeImportedImagePage(chapters[chapters.length-1],ch,false);
+      else pendingImagePages.push(ch);
+      continue;
+    }
+
+    if(ch&&(ch.body.trim()||ch.title.trim())){
+      if(pendingImagePages.length){
+        for(let p=pendingImagePages.length-1;p>=0;p--)mergeImportedImagePage(ch,pendingImagePages[p],true);
+        pendingImagePages.length=0;
+      }
+      chapters.push(ch);
+    }
   }
 
+  // Kui EPUB koosnes ainult pildilehtedest, säilitame need ühe redigeeritava peatükina.
+  if(!chapters.length&&pendingImagePages.length){
+    const ch=newChapter("Esimene peatükk","");
+    for(const page of pendingImagePages)mergeImportedImagePage(ch,page,false);
+    chapters.push(ch);
+  }
   if(!chapters.length)chapters.push(newChapter("Esimene peatükk",""));
   return {bookTitle,author,language,cover,chapters,missing,importedFromEpub:true};
 }

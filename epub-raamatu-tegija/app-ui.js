@@ -2,6 +2,29 @@
    Peatükkide UI
    ========================================================= */
 
+function ensureEditorShellControls(){
+  if(!document.querySelector("#includeVisibleToc")){
+    const firstCard=document.querySelector("main .card");
+    const fields=firstCard?.querySelector(".fields");
+    if(firstCard&&fields){
+      const box=document.createElement("div");
+      box.className="toc-settings";
+      box.innerHTML='<label class="checkline"><input id="includeVisibleToc" type="checkbox" checked><span>Lisa raamatu algusse nähtav klikitav sisukord</span></label><div class="hint" style="margin-top:6px">Peatüki juures saad valikuga „Sisukorras” määrata, milliseid pealkirju näidatakse.</div>';
+      fields.insertAdjacentElement("afterend",box);
+    }
+  }
+  if(!document.querySelector("#chapterNav")){
+    const nav=document.createElement("div");
+    nav.className="chapter-nav";
+    nav.id="chapterNav";
+    nav.hidden=true;
+    nav.setAttribute("aria-label","Peatükkide vahel liikumine");
+    nav.innerHTML='<button class="btn nav-arrow" id="chapterPrev" type="button" title="Eelmine peatükk">‹</button><select id="chapterJump" aria-label="Vali peatükk"><option value="">Liigu peatükki…</option></select><button class="btn nav-arrow" id="chapterNext" type="button" title="Järgmine peatükk">›</button>';
+    document.body.appendChild(nav);
+  }
+}
+ensureEditorShellControls();
+
 function chapterDisplayTitle(ch,index){
   return (ch.title||"").trim()||`Peatükk ${index+1}`;
 }

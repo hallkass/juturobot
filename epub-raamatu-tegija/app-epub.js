@@ -8,7 +8,7 @@ function renderChapterBody(ch,imagePathById,forPreview=false){
   while((m=re.exec(ch.body))!==null){
     out+=forPreview?renderTextPreview(ch.body.slice(last,m.index)):renderTextXhtml(ch.body.slice(last,m.index));
     const img=ch.images.find(x=>x.id===m[1]);
-    if(img){const src=forPreview?img.url:imagePathById.get(img.id);if(src){const cap=img.caption?`<figcaption>${esc(img.caption)}</figcaption>`:"";out+=`<figure><img src="${forPreview?src:"../images/"+src}" alt="${esc(img.caption||img.name||"Pilt")}"/>${cap}</figure>`}}
+    if(img){const src=forPreview?img.url:imagePathById.get(img.id);if(src){const cap=img.caption?`<figcaption>${esc(img.caption)}</figcaption>`:"";const size=["small","large"].includes(img.size)?img.size:"auto";out+=`<figure class="img-${size}"><img src="${forPreview?src:"../images/"+src}" alt="${esc(img.caption||img.name||"Pilt")}"/>${cap}</figure>`}}
     last=re.lastIndex;
   }
   out+=forPreview?renderTextPreview(ch.body.slice(last)):renderTextXhtml(ch.body.slice(last));return out;
@@ -31,7 +31,7 @@ async function buildEpub(){
       imagePathById.set(img.id,path);zip.add("OEBPS/images/"+path,await blobBytes(img.blob));imageManifest.push({id:"img"+(imageNo++),path,mime:img.type||mimeFromName(path)});
     }
   }
-  const css=`@namespace epub "http://www.idpf.org/2007/ops";html,body{margin:0;padding:0}body{font-family:Georgia,"Times New Roman",serif;line-height:1.58;margin:5%;hyphens:auto}h1{text-align:center;font-size:2em;margin-top:16%}h2{font-size:1.55em;margin:1.7em 0 1em}.author{text-align:center;font-style:italic}.cover{text-align:center;margin:2em auto}.cover img{max-width:100%;max-height:90vh}p{margin:0 0 .85em;text-indent:1.2em}p.first{text-indent:0}figure{margin:1.4em auto;text-align:center;page-break-inside:avoid}figure img{max-width:100%;height:auto}figcaption{font-size:.85em;font-style:italic;margin-top:.4em;color:#555}`;
+  const css=`@namespace epub "http://www.idpf.org/2007/ops";html,body{margin:0;padding:0}body{font-family:Georgia,"Times New Roman",serif;line-height:1.58;margin:5%;hyphens:auto}h1{text-align:center;font-size:2em;margin-top:16%}h2{font-size:1.55em;margin:1.7em 0 1em}.author{text-align:center;font-style:italic}.cover{text-align:center;margin:2em auto}.cover img{max-width:100%;max-height:90vh}p{margin:0 0 .85em;text-indent:1.2em}p.first{text-indent:0}figure{margin:1.4em auto;text-align:center;page-break-inside:avoid}figure img{max-width:100%;height:auto}figure.img-small img{width:42%;max-width:360px}figure.img-large img{width:100%;max-width:100%}figcaption{font-size:.85em;font-style:italic;margin-top:.4em;color:#555}`;
   zip.add("OEBPS/styles/book.css",css);
   zip.add("OEBPS/text/title.xhtml",`<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${xmlEsc(lang)}" lang="${xmlEsc(lang)}"><head><title>${xmlEsc(title)}</title><link rel="stylesheet" type="text/css" href="../styles/book.css"/></head><body><h1>${xmlEsc(title)}</h1>${author?`<div class="author">${xmlEsc(author)}</div>`:""}${coverInfo?`<div class="cover"><img src="../images/${coverInfo.path}" alt="Kaanepilt"/></div>`:""}</body></html>`);
   const chapterItems=[];

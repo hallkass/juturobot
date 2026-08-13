@@ -3,7 +3,11 @@ function previewBook(){
   const author=$("#author").value.trim();
   let x=`<h1>${esc(title)}</h1>${author?`<div class="author">${esc(author)}</div>`:""}`;
   if(state.cover)x+=`<div class="cover"><img src="${state.cover.url}" alt=""></div>`;
-  for(const ch of state.chapters)x+=`<h2>${esc(ch.title||"Peatükk")}</h2>${renderChapterBody(ch,new Map(),true)}`;
+  const tocChapters=state.chapters.map((ch,index)=>({ch,index})).filter(x=>x.ch.tocInclude!==false);
+  if($("#includeVisibleToc")?.checked!==false){
+    x+=`<section class="preview-visible-toc"><h2>Sisukord</h2>${tocChapters.length?`<ol>${tocChapters.map(({ch,index})=>`<li><a href="#preview-${ch.id}">${esc((ch.title||"").trim()||`Peatükk ${index+1}`)}</a></li>`).join("")}</ol>`:`<p>Sisukorda ei ole valitud ühtegi peatükki.</p>`}</section>`;
+  }
+  for(const ch of state.chapters)x+=`<h2 id="preview-${ch.id}">${esc(ch.title||"Peatükk")}</h2>${renderChapterBody(ch,new Map(),true)}`;
   $("#bookPreview").innerHTML=x;$("#previewModal").classList.add("show");
 }
 
@@ -31,7 +35,6 @@ async function handleImport(files){
     else if(/\.docx$/i.test(source.name))result=await importDocx(source,extras);
     else result=await importTxt(source,extras);
 
-    // Eelmise raamatu kaas ei tohi uude imporditud raamatusse jääda.
     if(state.cover)setCover(null);
     applyImported(result);
 

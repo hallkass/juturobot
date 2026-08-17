@@ -16,7 +16,7 @@
       <section class="card"><h2>2. Peatükid ja alapealkirjad</h2><div id="chapters"></div><button class="btn primary" id="addChapter" type="button">+ Lisa järgmine osa</button></section>
     </main>
     <aside class="side">
-      <section class="card"><h3>Impordi EPUB, TXT või DOCX</h3><div class="drop" id="dropZone"><strong>Lohista failid siia</strong><span class="hint">EPUB-i saad uuesti avada ja edasi toimetada</span><input id="importFiles" type="file" multiple accept=".epub,.txt,.docx,image/*"></div><div class="hint">EPUB-ist tuuakse võimalusel sisse pealkiri, autor, kaas, osad, pildid, H-tasemed ja selle redaktoriga loodud footnote’id. TXT-s saab kasutada ka märgendeid #h1 … #h6.</div><div class="sep"></div><div class="markup">#pealkiri Minu raamatu pealkiri
+      <section class="card"><h3>Impordi EPUB, TXT või DOCX</h3><div class="drop" id="dropZone"><strong>Lohista failid siia</strong><span class="hint">EPUB-i saad uuesti avada ja edasi toimetada</span><input id="importFiles" type="file" multiple accept=".epub,.txt,.docx,image/*"></div><div class="hint">EPUB-ist tuuakse võimalusel sisse pealkiri, autor, kaas, osad, pildid, pildisuurused, H-tasemed ja selle redaktoriga loodud footnote’id. TXT-s saab kasutada ka märgendeid #h1 … #h6.</div><div class="sep"></div><div class="markup">#pealkiri Minu raamatu pealkiri
 #autor Eesnimi Perekonnanimi
 #keel et
 #kaanepilt cover.jpg
@@ -28,7 +28,7 @@ Siia tuleb tekst.
 Alapeatüki tekst.
 
 #pilt foto1.jpg | Pildiallkiri</div><div id="importStatus" class="status"></div></section>
-      <section class="card"><h3>3. Valmis raamat</h3><button class="btn full" id="previewBook" type="button">Eelvaade</button><button class="btn primary full" style="margin-top:9px" id="exportEpub" type="button">Loo EPUB ja laadi alla</button><a class="btn full" style="margin-top:9px;display:block;text-align:center;text-decoration:none;background:#ff9900;border-color:#e88b00;color:#171717" href="https://kdp.amazon.com/bookshelf" target="_blank" rel="noopener noreferrer">Pane raamat Amazonis müüki →</a><div class="hint" style="margin-top:7px">Avab Amazon Kindle Direct Publishingu (KDP). Laadi seal üles selle lehega loodud EPUB, lisa müügiandmed ja hind ning avalda raamat.</div><div id="exportStatus" class="status"></div><div class="note" style="margin-top:12px">Footnote lisatakse kursori asukohta viitena. EPUB-is saab viitenumbrilt liikuda märkuse juurde ja ↩ lingiga tagasi teksti.</div></section>
+      <section class="card"><h3>3. Valmis raamat</h3><button class="btn full" id="previewBook" type="button">Eelvaade</button><button class="btn primary full" style="margin-top:9px" id="exportEpub" type="button">Loo EPUB ja laadi alla</button><a class="btn full" style="margin-top:9px;display:block;text-align:center;text-decoration:none;background:#ff9900;border-color:#e88b00;color:#171717" href="https://kdp.amazon.com/bookshelf" target="_blank" rel="noopener noreferrer">Pane raamat Amazonis müüki →</a><div class="hint" style="margin-top:7px">Avab Amazon Kindle Direct Publishingu (KDP). Laadi seal üles selle lehega loodud EPUB, lisa müügiandmed ja hind ning avalda raamat.</div><div id="exportStatus" class="status"></div><div class="note" style="margin-top:12px">Footnote lisatakse kursori asukohta viitena. EPUB-is viib tekstis olev number märkuse juurde ning märkuse enda number ja ↩ link viivad tagasi teksti.</div></section>
     </aside>
   </div>
   <div class="footer">Serverit ega andmebaasi ei ole vaja — raamat koostatakse sinu brauseris.</div>
@@ -39,9 +39,9 @@ Alapeatüki tekst.
 <script src="../epub-raamatu-tegija/app-images.js?v=20260811-2318"></script>
 <script src="../epub-raamatu-tegija/app-docx.js"></script>
 <script src="../epub-raamatu-tegija/app-epub-import.js?v=20260813-2044"></script>
-<script src="../epub-raamatu-tegija/app-import-structure.js?v=20260814-1103"></script>
+<script src="../epub-raamatu-tegija/app-import-structure.js?v=20260817-1125"></script>
 <script src="../epub-raamatu-tegija/app-epub.js"></script>
-<script src="../epub-raamatu-tegija/app-headings-footnotes.js?v=20260814-1115"></script>
+<script src="../epub-raamatu-tegija/app-headings-footnotes.js?v=20260817-1125"></script>
 <script src="../epub-raamatu-tegija/app-export-structure.js?v=20260814-1103"></script>
 <script src="../epub-raamatu-tegija/app-main.js?v=20260814-1103"></script>
 </body></html>

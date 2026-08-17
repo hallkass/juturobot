@@ -2,10 +2,25 @@ function epubTypeValue(node){return String(node?.getAttribute?.("epub:type")||no
 function epubRoleValue(node){return String(node?.getAttribute?.("role")||"").trim()}
 function epubPlainFootnoteText(node){
   const clone=node.cloneNode(true);
-  for(const a of [...clone.getElementsByTagName("a")]){const href=a.getAttribute("href")||"",type=epubTypeValue(a);if(a.classList?.contains("fn-back")||/backlink/.test(type)||/#fnref-/i.test(href))a.remove()}
+  for(const a of [...clone.getElementsByTagName("a")]){const href=a.getAttribute("href")||"",type=epubTypeValue(a);if(a.classList?.contains("fn-back")||a.classList?.contains("fn-back-number")||/backlink/.test(type)||/#fnref-/i.test(href))a.remove()}
   for(const br of [...clone.getElementsByTagName("br")])br.replaceWith("\n");
   for(const tag of ["p","div","li","blockquote"]){for(const el of [...clone.getElementsByTagName(tag)])el.append("\n\n")}
   return String(clone.textContent||"").replace(/[ \t]+\n/g,"\n").replace(/\n[ \t]+/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+function epubImportedImageSize(node,body){
+  let p=node;
+  while(p&&p!==body){
+    const cls=String(p.getAttribute?.("class")||"");
+    if(/(^|\s)img-large(\s|$)/.test(cls))return "large";
+    if(/(^|\s)img-small(\s|$)/.test(cls))return "small";
+    if(/(^|\s)img-auto(\s|$)/.test(cls))return "auto";
+    p=p.parentElement;
+  }
+  const style=String(node?.getAttribute?.("style")||"").toLowerCase();
+  const width=String(node?.getAttribute?.("width")||"").trim();
+  if(/width\s*:\s*100%/.test(style)||width==="100%")return "large";
+  const pct=style.match(/width\s*:\s*([0-9.]+)%/);if(pct&&parseFloat(pct[1])<=55)return "small";
+  return "auto";
 }
 
 importEpub=async function(source){
@@ -50,7 +65,7 @@ importEpub=async function(source){
       if(["script","style","nav","head"].includes(tag)||types.includes("footnotes")||types.includes("footnote")||role==="doc-endnotes"||role==="doc-footnote")return "";
       if(tag==="br")return "\n";if(tag==="figcaption")return "";
       if(tag==="a"&&(types.includes("noteref")||role==="doc-noteref")){const href=node.getAttribute("href")||"",fragment=href.includes("#")?decodeURIComponent(href.split("#").pop()):"",fn=footnoteDefs.get(fragment);if(fn){if(!ch.footnotes.some(x=>x.id===fn.id))ch.footnotes.push(fn);return `[[FN:${fn.id}]]`}}
-      if(tag==="img"||tag==="image"){const src=node.getAttribute("src")||node.getAttribute("href")||node.getAttribute("xlink:href")||"",caption=figureCaption(node)||node.getAttribute("alt")||"",asset=await loadChapterImage(src,rec.path,caption,imageCache);if(!asset)return "";if(!ch.images.includes(asset))ch.images.push(asset);return `\n\n[[PILT:${asset.id}]]\n\n`}
+      if(tag==="img"||tag==="image"){const src=node.getAttribute("src")||node.getAttribute("href")||node.getAttribute("xlink:href")||"",caption=figureCaption(node)||node.getAttribute("alt")||"",size=epubImportedImageSize(node,body),asset=await loadChapterImage(src,rec.path,caption,imageCache);if(!asset)return "";asset.size=size;if(!ch.images.includes(asset))ch.images.push(asset);return `\n\n[[PILT:${asset.id}]]\n\n`}
       let inner="";for(const child of node.childNodes)inner+=await walk(child);const block=["p","div","section","article","aside","header","footer","li","blockquote","pre","table","tr","h1","h2","h3","h4","h5","h6"].includes(tag);return block?`\n\n${inner.trim()}\n\n`:inner;
     }
     let editable=await walk(body);editable=editable.replace(/[ \t]+\n/g,"\n").replace(/\n[ \t]+/g,"\n").replace(/[ \t]{2,}/g," ").replace(/\n{3,}/g,"\n\n").trim();ch.body=editable;

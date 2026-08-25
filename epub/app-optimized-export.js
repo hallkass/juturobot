@@ -1,4 +1,4 @@
-const EPUB_IMAGE_OPTIMIZE={chapterMax:2000,coverMax:2560,jpegQuality:.85};
+const EPUB_IMAGE_OPTIMIZE={chapterMax:1800,coverMax:2560,jpegQuality:.80};
 const buildEpubOriginalImages=buildEpub;
 
 function normalizedEpubImageType(asset){
@@ -102,10 +102,12 @@ async function exportOptimizedEpub(){
 }
 function installOptimizedExportUi(){
   const originalBtn=$("#exportEpub");if(!originalBtn||$("#exportEpubOptimized"))return;
+  const amazonBtn=document.querySelector('a[href*="kdp.amazon.com"]');
+  const amazonHint=amazonBtn?.nextElementSibling?.classList?.contains("hint")?amazonBtn.nextElementSibling:null;
   const btn=document.createElement("button");btn.className="btn full";btn.style.marginTop="9px";btn.id="exportEpubOptimized";btn.type="button";btn.textContent="Loo optimeeritud EPUB";
-  originalBtn.insertAdjacentElement("afterend",btn);
-  const note=document.createElement("div");note.className="note optimized-export-note";
-  note.innerHTML=`<strong>Optimeeritud EPUB:</strong> vähendab pilte ainult salvestamise ajal. Sisupildi pikem külg piiratakse võimalusel kuni ${EPUB_IMAGE_OPTIMIZE.chapterMax} px-ni, kaanepilt kuni ${EPUB_IMAGE_OPTIMIZE.coverMax} px-ni ning JPEG-fotod salvestatakse kvaliteediga ${Math.round(EPUB_IMAGE_OPTIMIZE.jpegQuality*100)}%. Kui brauseri optimeeritud pilt tuleks originaalist suurem, jäetakse EPUB-i originaalpilt. Brauseris olevad originaalfotod jäävad alles kuni lehe sulgemiseni. „Automaatne”, „Väike” ja „Suur” kuvamisvalikud ei muutu.<br><br>Kasuta seda eelkõige siis, kui raamat on valmis: kui avad optimeeritud EPUB-faili hiljem uuesti redaktoris, on selles olevad vähendatud pildid juba optimeeritud.`;
+  if(amazonHint)amazonHint.insertAdjacentElement("afterend",btn);else originalBtn.insertAdjacentElement("afterend",btn);
+  const note=document.createElement("div");note.className="hint optimized-export-note";
+  note.innerHTML=`Vähendab ainult salvestatavas EPUB-is suuri pilte (sisupildid kuni ${EPUB_IMAGE_OPTIMIZE.chapterMax} px, JPEG ${Math.round(EPUB_IMAGE_OPTIMIZE.jpegQuality*100)}%). Originaalid jäävad brauserisse. Kasuta eelkõige valmis raamatu puhul; hiljem uuesti avades on optimeeritud EPUB-i pildid juba vähendatud.`;
   btn.insertAdjacentElement("afterend",note);
   btn.addEventListener("click",exportOptimizedEpub);
 }

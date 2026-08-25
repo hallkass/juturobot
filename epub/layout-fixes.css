@@ -1,0 +1,12 @@
+/* Väikesed kasutajaliidese parandused. */
+.chapter-nav{padding:8px}
+.chapter-nav select{height:44px;min-height:44px;padding:7px 10px;line-height:1.25}
+.chapter-nav .nav-arrow{width:40px;height:40px;min-height:40px}
+.modal{z-index:1400}
+.preview-close{margin-top:12px}
+.optimized-export-note{margin-top:9px;margin-bottom:9px}
+@media(max-width:620px){
+  .chapter-nav select{height:42px;min-height:42px;padding:6px 9px}
+  .chapter-nav .nav-arrow{width:38px;height:38px;min-height:38px}
+  .preview-close{margin-top:0}
+}

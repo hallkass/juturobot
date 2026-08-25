@@ -39,7 +39,10 @@ async function optimizeEpubImageBlob(asset,maxLong){
     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
     ctx.drawImage(source,0,0,targetWidth,targetHeight);
     const candidate=await canvasToBlob(canvas,type,type==="image/jpeg"?EPUB_IMAGE_OPTIMIZE.jpegQuality:undefined);
-    if(!mustResize&&candidate.size>=originalBytes)return unchanged();
+    /* Brauseri uuesti kodeeritud fail võib mõne juba hästi pakitud JPEG-i või PNG puhul
+       tulla originaalist suurem. Optimeeritud EPUB ei tohi seetõttu kunagi kasvada:
+       kasutame uut pilti ainult siis, kui selle baitide arv on päriselt väiksem. */
+    if(candidate.size>=originalBytes)return unchanged();
     return {blob:candidate,changed:true,originalBytes,finalBytes:candidate.size};
   }catch(err){
     console.warn("Pildi optimeerimine jäeti vahele:",asset?.name||"pilt",err);
@@ -92,7 +95,7 @@ async function exportOptimizedEpub(){
     const name=optimizedEpubName(),blob=new Blob([bytes],{type:"application/epub+zip"}),url=URL.createObjectURL(blob),a=document.createElement("a");
     a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
     const info=window.lastOptimizedEpubInfo;
-    const imageInfo=info&&info.totalImages?` Pildid: ${mb(info.originalBytes)} MB → ${mb(info.finalBytes)} MB; muudetud ${info.changedImages}/${info.totalImages}.`:"";
+    const imageInfo=info&&info.totalImages?` Pildid: ${mb(info.originalBytes)} MB → ${mb(info.finalBytes)} MB; muudetud ${info.changedImages}/${info.totalImages}; sääst ${mb(Math.max(0,info.originalBytes-info.finalBytes))} MB.`:"";
     showStatus(statusExport,`Valmis: ${name} (${mb(bytes.length)} MB).${imageInfo} Brauseris olevad originaalpildid jäid puutumata.`,"ok");
   }catch(err){console.error(err);showStatus(statusExport,"Optimeeritud EPUB-i loomine ebaõnnestus: "+err.message,"err")}
   finally{if(btn)btn.disabled=false;if(originalBtn)originalBtn.disabled=false}
@@ -102,7 +105,7 @@ function installOptimizedExportUi(){
   const btn=document.createElement("button");btn.className="btn full";btn.style.marginTop="9px";btn.id="exportEpubOptimized";btn.type="button";btn.textContent="Loo optimeeritud EPUB";
   originalBtn.insertAdjacentElement("afterend",btn);
   const note=document.createElement("div");note.className="note optimized-export-note";
-  note.innerHTML=`<strong>Optimeeritud EPUB:</strong> vähendab pilte ainult salvestamise ajal. Sisupildi pikem külg piiratakse kuni ${EPUB_IMAGE_OPTIMIZE.chapterMax} px-ni, kaanepilt kuni ${EPUB_IMAGE_OPTIMIZE.coverMax} px-ni ning JPEG-fotod salvestatakse kvaliteediga ${Math.round(EPUB_IMAGE_OPTIMIZE.jpegQuality*100)}%. Brauseris olevad originaalfotod jäävad alles kuni lehe sulgemiseni. „Automaatne”, „Väike” ja „Suur” kuvamisvalikud ei muutu.<br><br>Kasuta seda eelkõige siis, kui raamat on valmis: kui avad optimeeritud EPUB-faili hiljem uuesti redaktoris, on selles olevad pildid juba optimeeritud.`;
+  note.innerHTML=`<strong>Optimeeritud EPUB:</strong> vähendab pilte ainult salvestamise ajal. Sisupildi pikem külg piiratakse võimalusel kuni ${EPUB_IMAGE_OPTIMIZE.chapterMax} px-ni, kaanepilt kuni ${EPUB_IMAGE_OPTIMIZE.coverMax} px-ni ning JPEG-fotod salvestatakse kvaliteediga ${Math.round(EPUB_IMAGE_OPTIMIZE.jpegQuality*100)}%. Kui brauseri optimeeritud pilt tuleks originaalist suurem, jäetakse EPUB-i originaalpilt. Brauseris olevad originaalfotod jäävad alles kuni lehe sulgemiseni. „Automaatne”, „Väike” ja „Suur” kuvamisvalikud ei muutu.<br><br>Kasuta seda eelkõige siis, kui raamat on valmis: kui avad optimeeritud EPUB-faili hiljem uuesti redaktoris, on selles olevad vähendatud pildid juba optimeeritud.`;
   btn.insertAdjacentElement("afterend",note);
   btn.addEventListener("click",exportOptimizedEpub);
 }

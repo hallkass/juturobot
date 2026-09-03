@@ -1,15 +1,16 @@
-fetch('v5.js')
-  .then(r=>{if(!r.ok)throw new Error('v5.js laadimine ebaõnnestus');return r.text()})
-  .then(src=>{
-    src=src.replace(
+Promise.all([
+  fetch('v5.js').then(r=>{if(!r.ok)throw new Error('v5.js laadimine ebaõnnestus');return r.text()}),
+  fetch('calendar-guide-patch.js').then(r=>{if(!r.ok)throw new Error('kalendrilisa laadimine ebaõnnestus');return r.text()})
+])
+  .then(([baseSrc,patchSrc])=>{
+    baseSrc=baseSrc.replace(
       "d.className='lesson'+(l.locked?' locked':'')+(hard.length?' hard':(!hard.length&&soft.length?' soft':'')+(part?' part':'');",
       "d.className='lesson'+(l.locked?' locked':'')+(hard.length?' hard':(!hard.length&&soft.length?' soft':''))+(part?' part':'');"
     );
-    (0,eval)(src);
-    return fetch('calendar-guide-patch.js');
+    // Mõlemad skriptid käivitatakse ühe eval'i sees, et v5.js `let state`
+    // ja teised leksikaalsed muutujad oleksid kalendrilisale samas skoobis nähtavad.
+    (0,eval)(baseSrc+'\n\n'+patchSrc);
   })
-  .then(r=>{if(!r.ok)throw new Error('kalendrilisa laadimine ebaõnnestus');return r.text()})
-  .then(src=>(0,eval)(src))
   .catch(err=>{
     console.error(err);
     const box=document.createElement('div');

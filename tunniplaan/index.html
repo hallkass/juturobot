@@ -1,1 +1,185 @@
-<!doctype html><html lang="et"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tunniplaani koostaja</title><link rel="stylesheet" href="style.css"></head><body><header><div><h1>Tunniplaani koostaja — prototüüp v4</h1><small>Õppekava + õpetajate nädalasaadavus + ruumide lukud + käsitsi paigutamine</small></div><div class="actions"><button class="secondary" id="checkBtn">Kontrolli</button><button class="primary" id="optimizeBtn">Jaga ja optimeeri</button><button class="ghost" id="resetBtn">Taasta näidis</button></div></header><div class="guide-wrap"><details class="guide" open><summary>Kuidas kasutada?</summary><ol><li><b>Pane paika õppekava:</b> määra iga klassi ja aine nädalane tunnivajadus ning vajalik ruumitüüp.</li><li><b>Seadista õpetajad:</b> määra kontakttundide maht ning lisa kõik aine–klassi kombinatsioonid, mida õpetaja võib õpetada.</li><li><b>Märgi saadavus:</b> klõpsa õpetaja nädalavõrgus slotte. Roheline = eelistatud, punane = keelatud, valge = sobib.</li><li><b>Vaata katvust:</b> dashboard näitab klasside lõikes puuduvaid tunde ja õpetajate lõikes allesjäänud kontakttundide mahtu.</li><li><b>Genereeri variant:</b> „Jaga ja optimeeri“ määrab ühe klassi ühe aine kõik tunnid samale sobivale õpetajale ning proovib leida neile ajad ja ruumid.</li><li><b>Kohenda käsitsi:</b> lohista tunde tunniplaanis või ruumide vaates. Klõps tunnil lukustab selle, et algoritm seda enam ei liigutaks.</li><li><b>Halda ruume:</b> ruumide vaates saad blokeerida konkreetse ruumi konkreetseks perioodiks ning liigutada tunde ruumide vahel.</li></ol><p><b>Põhimõte:</b> punased konfliktid on kõvad piirangud, kollased on pehmed eelistused. Sama klassi sama aine kõik nädalatunnid peavad jääma samale õpetajale. Inimene võib plaani käsitsi parandada ja lukustada head lahendused.</p></details></div><div class="app"><aside class="panel sidebar"><h2>Seadistused</h2><div class="card"><strong>Üldised reeglid</strong><div class="row"><div><label>Maks. järjest tunde</label><select id="maxConsecutive"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div><label>Maks. auke päevas</label><select id="maxGaps"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></div></div><label class="switch"><input type="checkbox" id="spreadSubjects" checked> Sama klassi sama aine võimalusel eri päevadele</label><label class="switch"><input type="checkbox" id="autoAssignTeachers" checked> Optimeerimisel jaga määramata tunnid pädevatele õpetajatele</label></div><h3>Õpetaja</h3><div class="card"><label>Õpetaja</label><select id="teacherSelect"></select><div class="row"><div><label>Kontakttunde kokku / nädal</label><input id="contactHours" type="number" min="0" max="40"></div><div><label>Maks. tunde päevas</label><input id="maxDaily" type="number" min="1" max="10"></div></div><label style="margin-top:11px">Nädala saadavus ja eelistused</label><div class="mini">Klõpsa slotil: vaba → eelistatud → keelatud → vaba.</div><div id="teacherAvailabilityGrid" class="avail-grid"></div><div class="teacher-grid-note"><span>Vaba</span><span class="pref">Eelistatud</span><span class="block">Keelatud</span></div><label style="margin-top:12px">Milliseid aineid millistele klassidele võib anda?</label><div id="skillList" class="skill-list"></div><button class="soft" id="addSkillBtn">+ Lisa aine–klassi pädevus</button><button class="primary full" id="saveTeacherBtn">Salvesta õpetaja</button></div><h3>Õppekava tunnivajadus</h3><div class="card"><div class="row"><div><label>Klass</label><select id="reqClass"></select></div><div><label>Aine</label><select id="reqSubject"></select></div></div><div class="row"><div><label>Tunde nädalas</label><input id="reqHours" type="number" min="0" max="15" value="2"></div><div><label>Ruumitüüp</label><select id="reqRoomType"><option>tavaklass</option><option>labor</option><option>arvutiklass</option></select></div></div><button class="primary full" id="addRequirementBtn">Lisa / uuenda nõue</button><div id="requirementList" class="rule-list"></div></div><h3>Õpetajate koormus</h3><div id="teacherSummary"></div><h3>Tunniplaani filter</h3><div class="card"><label>Vaade</label><select id="viewFilter"></select></div><h3>Kontroll</h3><div class="legend"><span>🔒 tund lukus</span><span>🟥 kõva konflikt</span><span>🟨 pehme kõrvalekalle</span></div><div id="notice" class="notice"></div><div id="conflictList" class="conflict-list"></div></aside><main class="panel main"><div class="kpi-grid"><div class="kpi"><b id="kpiRequired">0</b><span>ette nähtud kontakttundi</span></div><div class="kpi"><b id="kpiScheduled">0</b><span>tunniplaani paigutatud</span></div><div class="kpi"><b id="kpiUncovered">0</b><span>veel katmata tundi</span></div><div class="kpi"><b id="kpiFreeCapacity">0</b><span>õpetajate vaba kontakttunni maht</span></div></div><div class="dashboard"><section class="dash-card"><div class="section-title"><h3>Klasside katvus</h3><span class="status">ette nähtud vs kehtivalt paigutatud</span></div><div class="dash-scroll"><table class="dash-table"><thead><tr><th>Klass</th><th>Aine</th><th>Kaetud</th><th>Seis</th></tr></thead><tbody id="classCoverageBody"></tbody></table></div></section><section class="dash-card"><div class="section-title"><h3>Õpetajate koormus</h3><span class="status">määratud vs kontakttunnid</span></div><div class="dash-scroll"><table class="dash-table"><thead><tr><th>Õpetaja</th><th>Määratud</th><th>Vaba</th><th>Koormus</th></tr></thead><tbody id="teacherCapacityBody"></tbody></table></div></section></div><div class="view-tabs"><button class="view-tab active" data-main-view="schedule">Tunniplaan</button><button class="view-tab" data-main-view="rooms">Ruumid</button></div><section id="scheduleView"><div class="toolbar"><div><strong>Nädala tunniplaan</strong><div class="status">Lohista tundi teise aega. Klõps tunnil = lukusta/vabasta.</div></div><div class="scorebox"><span class="badge hard" id="hardBadge">0 kõva</span><span class="badge softb" id="softBadge">0 pehmet</span><span class="score" id="score">100%</span></div></div><table class="schedule" id="schedule"><thead><tr><th>Periood</th><th>Esmaspäev</th><th>Teisipäev</th><th>Kolmapäev</th><th>Neljapäev</th><th>Reede</th></tr></thead><tbody></tbody></table></section><section id="roomsView" class="hidden"><div class="room-toolbar"><div><strong>Ruumide päevavaade</strong><div class="status">Lohista tund teise ruumi või perioodi. 🔒 blokeerib ruumi selleks slotiks.</div></div><select id="roomDay"></select></div><table class="room-lanes" id="roomLanes"><thead><tr><th>Ruum</th><th>1. periood</th><th>2. periood</th><th>3. periood</th><th>4. periood</th><th>5. periood</th><th>6. periood</th></tr></thead><tbody></tbody></table></section><div class="section-title after"><strong>Paigutamata tunnid</strong><span class="status">õppekava nõuded, millele pole veel aega ja/või õpetajat leitud</span></div><div id="unplacedPool" class="pool"></div></main></div><script src="app.js"></script><script src="same-teacher-rule.js"></script></body></html>
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tunniplaani koostaja v5</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Tunniplaani koostaja <span>v5</span></h1>
+    <small>Tsüklid · õpperühmad · õpetajad · ruumid · piirangupõhine tunniplaan</small>
+  </div>
+  <div class="top-actions">
+    <select id="globalCycle"></select>
+    <button class="secondary" id="checkAllBtn">Kontrolli</button>
+    <button class="primary" id="optimizeBtn">Koosta tunniplaan</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="nav panel">
+    <button class="nav-item active" data-page="dashboard">Ülevaade</button>
+    <button class="nav-item" data-page="year">Õppeaasta & tsüklid</button>
+    <button class="nav-item" data-page="groups">Klassid & rühmad</button>
+    <button class="nav-item" data-page="curriculum">Õppekava</button>
+    <button class="nav-item" data-page="teachers">Õpetajad</button>
+    <button class="nav-item" data-page="rooms">Ruumid</button>
+    <button class="nav-item" data-page="builder">Tunniplaani koostaja</button>
+    <div class="nav-foot">
+      <button class="soft full" id="resetBtn">Taasta näidisandmed</button>
+      <small>Muudatused salvestuvad selles brauseris automaatselt.</small>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div><h2>Ülevaade</h2><p>Kas valitud tsükli õppetöö on kaetud ja millised piirangud vajavad lahendamist?</p></div>
+        <span class="cycle-chip" id="dashCycleLabel"></span>
+      </div>
+      <details class="guide panel" open>
+        <summary>Kuidas prototüüpi kasutada?</summary>
+        <ol>
+          <li>Seadista <b>õppeaasta ja tsüklid</b> — tsüklite arv ja pikkus on muudetavad.</li>
+          <li>Loo <b>klassid ja õpperühmad</b>. Paralleelrühmadele anna sama paralleelsusgrupi nimi.</li>
+          <li>Sisesta <b>õppekava</b>: aastamaht ja tsüklite nädalatunnid või lase aastamaht tsüklite vahel jaotada.</li>
+          <li>Õpetaja juures määra pädevused, koormuse min/soov/max ning saadavus tasemetel <b>aasta → poolaasta → tsükkel</b>.</li>
+          <li>Ruumidele määra tüüp ja mahutavus; ruumi saab konkreetseks ajaks blokeerida.</li>
+          <li>Vajuta <b>Koosta tunniplaan</b>, seejärel lukusta head lahendused ja liiguta ülejäänut käsitsi.</li>
+        </ol>
+        <p>Prototüübi optimeerija on heuristiline. Punane = kõva konflikt. Kollane = pehme eelistus või kvaliteediprobleem.</p>
+      </details>
+      <div class="kpi-grid" id="dashboardKpis"></div>
+      <div class="grid2">
+        <section class="panel card-section"><div class="section-title"><h3>Klasside päevad</h3><span class="muted">augud ja päevane koormus</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Klass</th><th>E</th><th>T</th><th>K</th><th>N</th><th>R</th><th>Seis</th></tr></thead><tbody id="classDayDashboard"></tbody></table></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Õpetajate koormus</h3><span class="muted">min / soov / max</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Õpetaja</th><th>Määratud</th><th>Vahemik</th><th>Seis</th></tr></thead><tbody id="teacherLoadDashboard"></tbody></table></div></section>
+      </div>
+      <div class="grid2">
+        <section class="panel card-section"><div class="section-title"><h3>Õppekava katvus</h3><span class="muted">valitud tsükkel</span></div><div class="table-wrap tall"><table class="data-table"><thead><tr><th>Rühm</th><th>Aine</th><th>Vaja</th><th>Paigas</th><th>Seis</th></tr></thead><tbody id="coverageDashboard"></tbody></table></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Konfliktid</h3><span class="badge hard" id="hardCount">0</span></div><div id="conflictDashboard" class="issue-list"></div></section>
+      </div>
+    </section>
+
+    <section class="page" id="page-year">
+      <div class="page-head"><div><h2>Õppeaasta & tsüklid</h2><p>Tsüklite arv, pikkus ja poolaastad on kooli enda seadistada.</p></div><button class="primary" id="addCycleBtn">+ Lisa tsükkel</button></div>
+      <section class="panel form-card">
+        <div class="form-grid three">
+          <label>Õppeaasta nimi<input id="yearName"></label>
+          <label>Õppeaasta algus<input id="yearStart" type="date"></label>
+          <label>Õppeaasta lõpp<input id="yearEnd" type="date"></label>
+        </div>
+        <button class="primary" id="saveYearBtn">Salvesta õppeaasta</button>
+      </section>
+      <div id="cyclesList" class="stack"></div>
+    </section>
+
+    <section class="page" id="page-groups">
+      <div class="page-head"><div><h2>Klassid & rühmad</h2><p>Rühm võib sisaldada ühe või mitme klassi õpilasi; paralleelsusgrupi rühmad toimuvad samal ajal.</p></div></div>
+      <div class="grid2 align-start">
+        <section class="panel card-section">
+          <div class="section-title"><h3>Klassid</h3><button class="soft" id="addClassBtn">+ Klass</button></div>
+          <div id="classesList" class="stack compact"></div>
+        </section>
+        <section class="panel card-section">
+          <div class="section-title"><h3>Õpperühmad</h3><button class="soft" id="addGroupBtn">+ Rühm</button></div>
+          <div class="table-wrap tall"><table class="data-table"><thead><tr><th>Rühm</th><th>Aine</th><th>Klassid</th><th>Õpilasi</th><th>Paralleel</th><th></th></tr></thead><tbody id="groupsTable"></tbody></table></div>
+        </section>
+      </div>
+      <section class="panel form-card" id="groupEditor">
+        <h3>Rühma redaktor</h3>
+        <input type="hidden" id="groupId">
+        <div class="form-grid four">
+          <label>Rühma nimi<input id="groupName"></label>
+          <label>Aine<select id="groupSubject"></select></label>
+          <label>Õpilaste arv<input id="groupStudents" type="number" min="1"></label>
+          <label>Max rühma suurus<input id="groupMaxStudents" type="number" min="1"></label>
+        </div>
+        <div class="form-grid three">
+          <label>Lähteklassid<select id="groupClasses" multiple size="4"></select></label>
+          <label>Paralleelsusgrupp<input id="groupParallel" placeholder="nt MAT8"></label>
+          <label>Ruumitüüp<select id="groupRoomType"><option>tavaklass</option><option>labor</option><option>arvutiklass</option><option>spordisaal</option><option>töökoda</option></select></label>
+        </div>
+        <div class="form-grid two">
+          <label>Järjestikuseid perioode samas ruumis<select id="groupConsecutive"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+          <label class="check-label"><input type="checkbox" id="groupSameRoom" checked> Kui tund on mitmeperioodiline, kasuta kogu ploki jooksul sama ruumi</label>
+        </div>
+        <button class="primary" id="saveGroupBtn">Salvesta rühm</button>
+      </section>
+    </section>
+
+    <section class="page" id="page-curriculum">
+      <div class="page-head"><div><h2>Õppekava</h2><p>Aastamaht võib olla sisestatud kontakttundidena ja tsüklite koormus nädalatundidena.</p></div><button class="primary" id="addRequirementBtn">+ Õppekava nõue</button></div>
+      <section class="panel card-section">
+        <div class="table-wrap wide"><table class="data-table" id="curriculumTable"><thead></thead><tbody></tbody></table></div>
+      </section>
+      <section class="panel form-card" id="requirementEditor">
+        <h3>Õppekava nõude redaktor</h3>
+        <input type="hidden" id="reqId">
+        <div class="form-grid three">
+          <label>Õpperühm<select id="reqGroup"></select></label>
+          <label>Aine<select id="reqSubject"></select></label>
+          <label>Aastamaht (kontakttundi)<input id="reqAnnualHours" type="number" min="0"></label>
+        </div>
+        <div id="cycleHoursEditor" class="cycle-hours"></div>
+        <div class="inline-actions"><button class="soft" id="distributeHoursBtn">Jaga aastamaht tsüklitele</button><button class="primary" id="saveRequirementBtn">Salvesta nõue</button></div>
+      </section>
+    </section>
+
+    <section class="page" id="page-teachers">
+      <div class="page-head"><div><h2>Õpetajad</h2><p>Pädevused, tsükliti varieeruv koormus ning hierarhiline saadavus.</p></div><button class="primary" id="addTeacherBtn">+ Õpetaja</button></div>
+      <div class="grid-sidebar">
+        <aside class="panel list-panel" id="teacherList"></aside>
+        <section class="panel form-card">
+          <input type="hidden" id="teacherId">
+          <div class="form-grid two"><label>Nimi<input id="teacherName"></label><label>Kontaktkoormuse vaikeseade (soov)<input id="teacherDefaultTarget" type="number" min="0"></label></div>
+          <h3>Valitud tsükli koormus</h3>
+          <div class="form-grid three"><label>Min<input id="teacherLoadMin" type="number" min="0"></label><label>Soov<input id="teacherLoadTarget" type="number" min="0"></label><label>Max<input id="teacherLoadMax" type="number" min="0"></label></div>
+          <h3>Pädevused</h3><div id="teacherSkills" class="skill-list"></div><button class="soft" id="addTeacherSkillBtn">+ Lisa aine/rühm</button>
+          <h3>Saadavus</h3>
+          <div class="form-grid two"><label>Reegli tase<select id="availabilityScope"><option value="year">Õppeaasta vaikeseade</option><option value="semester1">I poolaasta</option><option value="semester2">II poolaasta</option><option value="cycle">Valitud tsükkel</option></select></label><label>Valitud tsükkel<select id="teacherCycleSelect"></select></label></div>
+          <div class="hint">Klõps: vaba → eelistatud → keelatud → pärib üldisemast tasemest. Tsükli vaates on taustal näha tegelikult rakenduv reegel.</div>
+          <div id="teacherAvailabilityGrid" class="availability-grid"></div>
+          <button class="primary" id="saveTeacherBtn">Salvesta õpetaja</button>
+        </section>
+      </div>
+    </section>
+
+    <section class="page" id="page-rooms">
+      <div class="page-head"><div><h2>Ruumid</h2><p>Ruumitüüp, mahutavus, blokeeringud ja tunnid ühises päevavaates.</p></div><button class="primary" id="addRoomBtn">+ Ruum</button></div>
+      <div class="grid-sidebar">
+        <aside class="panel list-panel" id="roomList"></aside>
+        <section class="panel form-card">
+          <input type="hidden" id="roomId">
+          <div class="form-grid three"><label>Nimi<input id="roomName"></label><label>Tüüp<select id="roomType"><option>tavaklass</option><option>labor</option><option>arvutiklass</option><option>spordisaal</option><option>töökoda</option></select></label><label>Mahutavus<input id="roomCapacity" type="number" min="1"></label></div>
+          <button class="primary" id="saveRoomBtn">Salvesta ruum</button>
+          <hr>
+          <div class="section-title"><h3>Ruumide päevavaade</h3><div class="inline-selects"><select id="roomCycleSelect"></select><select id="roomDaySelect"></select></div></div>
+          <div class="hint">🔒 blokeerib ruumi. Tundi saab lohistada teise sobivasse ruumi; lukustatud tundi ei liigutata.</div>
+          <div class="table-wrap wide"><table class="room-table"><thead><tr id="roomScheduleHead"></tr></thead><tbody id="roomScheduleBody"></tbody></table></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="page" id="page-builder">
+      <div class="page-head"><div><h2>Tunniplaani koostaja</h2><p>Genereeri valitud tsükkel, lukusta head plokid ja paranda käsitsi.</p></div><div class="inline-actions"><select id="builderCycleSelect"></select><button class="secondary" id="builderCheckBtn">Kontrolli</button><button class="primary" id="builderOptimizeBtn">Koosta / optimeeri</button></div></div>
+      <div class="builder-tools panel">
+        <label>Vaade<select id="builderView"><option value="all">Kõik</option></select></label>
+        <div class="legend"><span>🔒 lukus</span><span class="hard-dot">kõva konflikt</span><span class="soft-dot">pehme kõrvalekalle</span><span>↕ lohista</span></div>
+        <span class="badge hard" id="builderHardCount">0 kõva</span>
+      </div>
+      <div class="table-wrap wide panel schedule-wrap"><table class="schedule-table"><thead><tr id="scheduleHead"></tr></thead><tbody id="scheduleBody"></tbody></table></div>
+      <div class="grid2 after">
+        <section class="panel card-section"><div class="section-title"><h3>Paigutamata plokid</h3><span class="muted">sh paralleelpaketid</span></div><div id="unplacedBlocks" class="chip-list"></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Kontrolli tulemused</h3><span class="muted">valitud tsükkel</span></div><div id="builderIssues" class="issue-list"></div></section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

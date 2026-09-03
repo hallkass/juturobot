@@ -6,7 +6,10 @@ fetch('v5.js')
       "d.className='lesson'+(l.locked?' locked':'')+(hard.length?' hard':(!hard.length&&soft.length?' soft':''))+(part?' part':'');"
     );
     (0,eval)(src);
+    return fetch('calendar-guide-patch.js');
   })
+  .then(r=>{if(!r.ok)throw new Error('kalendrilisa laadimine ebaõnnestus');return r.text()})
+  .then(src=>(0,eval)(src))
   .catch(err=>{
     console.error(err);
     const box=document.createElement('div');

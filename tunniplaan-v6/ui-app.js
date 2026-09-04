@@ -1,0 +1,24 @@
+function exportData(){const payload={format:EXPORT_FORMAT,version:6,exportedAt:new Date().toISOString(),schoolYear:state.year.name,state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`tunniplaan-${(state.year.name||'projekt').replace(/[^a-zA-Z0-9äöüõÄÖÜÕ_-]+/g,'-')}-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Andmefail laaditi alla')}
+function importData(file){const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(x.format!==EXPORT_FORMAT||x.version!==6||!x.state?.cycles||!x.state?.groups)throw new Error('See ei ole v6 tunniplaani andmefail');if(!confirm(`Laadida projekt „${x.schoolYear||x.state.year?.name||''}“? Praegune brauseriseis asendatakse.`))return;localStorage.setItem(STORE+'-backup-before-import',JSON.stringify(state));snapshot('Import');state=x.state;normalizeSelections();save();renderAll();toast('Projekt failist laaditud')}catch(e){alert('Import ebaõnnestus: '+e.message)}};r.readAsText(file)}
+
+function renderAll(){normalizeSelections();renderSelectors();renderDashboard();renderCalendar();renderEntities();renderCurriculum();renderTeachers();renderRooms();renderTimeRequests();renderRules();renderBuilder();if(activePage==='diagnostics')renderDiagnostics();updateUndoButtons();save()}
+
+function bind(){
+  $$('.nav-item').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+  $('#globalCycle').onchange=e=>{activeCycle=e.target.value;renderAll()};
+  $('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#checkBtn').onclick=()=>{renderAll();toast(allIssues(activeCycle).length?'Leiti kõvasid konflikte':'Kõvad konfliktid puuduvad')};
+  $('#optimizeBtn').onclick=()=>optimize(activeCycle,'better');
+  $('#resetBtn').onclick=()=>{if(confirm('Taastada v6 näidisandmed?')){snapshot('Näidisandmete taastamine');state=defaults();activeCycle=state.cycles[0].id;selectedTeacher=state.teachers[0].id;selectedRoom=state.rooms[0].id;save();renderAll()}};
+  $('#exportBtn').onclick=exportData;$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value=''};
+  $('#saveYearBtn').onclick=()=>commit('Õppeaasta salvestamine',()=>{state.year.name=$('#yearName').value;state.year.start=$('#yearStart').value;state.year.end=$('#yearEnd').value;const wanted=clamp(+$('#periodCount').value||state.periods.length,1,12);while(state.periods.length<wanted){const n=Math.max(0,...state.periods.map(p=>p.n))+1;state.periods.push({id:uid('p'),n,start:'',end:'',breakAfter:0})}while(state.periods.length>wanted)state.periods.pop()});
+  $('#addCycleBtn').onclick=()=>commit('Tsükli lisamine',()=>{const id=uid('c'),weeks=7;state.cycles.push({id,name:'Tsükkel '+(state.cycles.length+1),weeks,semester:'semester2',start:'',end:''});state.requirements.forEach(r=>{r.cycleHours[id]=0;r.weekMasks??={};r.weekMasks[id]=Array.from({length:weeks},(_,i)=>i+1)})});
+  $('#addPeriodBtn').onclick=()=>commit('Perioodi lisamine',()=>{const n=Math.max(0,...state.periods.map(p=>p.n))+1;state.periods.push({id:uid('p'),n,start:'',end:'',breakAfter:0})});$('#addClosureBtn').onclick=showClosureEditor;
+  $('#addClassBtn').onclick=()=>editClass();$('#addSubjectBtn').onclick=()=>editSubject();$('#addGroupBtn').onclick=()=>editGroup();$('#addRequirementBtn').onclick=()=>editRequirement();
+  $('#addTeacherBtn').onclick=()=>{const name=prompt('Õpetaja nimi','Uus õpetaja');if(name)commit('Õpetaja lisamine',()=>{const id=uid('t');state.teachers.push({id,name,defaultTarget:14,homeBuildingId:state.buildings[0]?.id||'',loads:{},skills:[]});selectedTeacher=id})};
+  $('#addRoomBtn').onclick=()=>{const name=prompt('Ruumi nimi','Uus ruum');if(name)commit('Ruumi lisamine',()=>{const id=uid('r');state.rooms.push({id,name,type:'tavaklass',capacity:30,buildingId:state.buildings[0]?.id||'',blocked:{}});selectedRoom=id})};
+  $('#roomCycleSelect').onchange=renderRoomSchedule;$('#roomDaySelect').onchange=renderRoomSchedule;
+  $('#timeEntityType').onchange=()=>{setOptions($('#timeEntityId'),entityOptions($('#timeEntityType').value));loadTimeDraft()};$('#timeEntityId').onchange=loadTimeDraft;$('#timeScope').onchange=loadTimeDraft;$('#timeCycle').onchange=loadTimeDraft;$('#saveTimeRequestBtn').onclick=saveTimeDraft;$('#addTimeRequestBtn').onclick=()=>{timeDraft={};renderTimeGrid()};
+  $('#builderCycle').onchange=e=>{activeCycle=e.target.value;renderAll()};$('#builderView').onchange=renderBuilder;$('#builderOptimizeBtn').onclick=()=>optimize($('#builderCycle').value||activeCycle,$('#optimizeDepth').value);$('#suggestMovesBtn').onclick=suggestMovesAndSwaps;$('#diagnoseUnplacedBtn').onclick=()=>showPage('diagnostics');$('#refreshDiagnosticsBtn').onclick=renderDiagnostics;
+}
+
+bind();renderAll();

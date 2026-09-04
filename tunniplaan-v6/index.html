@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tunniplaani koostaja v6</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Tunniplaani koostaja <span>v6</span></h1>
+    <small>Piirangud · kaalud · tsüklid · rühmad · diagnostika · käsitsi parandamine</small>
+  </div>
+  <div class="top-actions">
+    <select id="globalCycle"></select>
+    <button id="undoBtn" class="soft" title="Võta viimane muudatus tagasi">↶ Undo</button>
+    <button id="redoBtn" class="soft" title="Taasta tagasivõetud muudatus">↷ Redo</button>
+    <button id="checkBtn" class="secondary">Kontrolli</button>
+    <button id="optimizeBtn" class="primary">Optimeeri</button>
+  </div>
+</header>
+<div class="shell">
+  <nav class="nav panel">
+    <button class="nav-item active" data-page="dashboard">Ülevaade</button>
+    <button class="nav-item" data-page="calendar">Õppeaasta & kalender</button>
+    <button class="nav-item" data-page="entities">Klassid, rühmad & ained</button>
+    <button class="nav-item" data-page="curriculum">Õppekava & tunnipaketid</button>
+    <button class="nav-item" data-page="teachers">Õpetajad</button>
+    <button class="nav-item" data-page="rooms">Ruumid & hooned</button>
+    <button class="nav-item" data-page="timerequests">Ajapiirangud</button>
+    <button class="nav-item" data-page="rules">Reeglid & kaalud</button>
+    <button class="nav-item" data-page="builder">Tunniplaani koostaja</button>
+    <button class="nav-item" data-page="diagnostics">Diagnostika</button>
+    <button class="nav-item" data-page="guide">Õpetus</button>
+    <div class="nav-foot">
+      <button id="exportBtn" class="soft full">⬇ Laadi andmed alla</button>
+      <button id="importBtn" class="soft full">⬆ Laadi andmed failist</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden>
+      <button id="resetBtn" class="danger ghost full">Taasta v6 näidis</button>
+      <small>Automaatne salvestus toimub ainult selles brauseris.</small>
+    </div>
+  </nav>
+
+  <main class="workspace">
+    <section class="page active" id="page-dashboard">
+      <div class="page-head"><div><h2>Ülevaade</h2><p>Kas valitud tsükli tunniplaan on teostatav, kaetud ja mõistlik?</p></div><span id="dashCycle" class="cycle-chip"></span></div>
+      <div id="dashboardKpis" class="kpi-grid"></div>
+      <div class="grid2">
+        <section class="panel card-section"><div class="section-title"><h3>Klasside päevad</h3><span class="muted">augud, päeva pikkus, koormus</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Klass</th><th>E</th><th>T</th><th>K</th><th>N</th><th>R</th><th>Seis</th></tr></thead><tbody id="dashClasses"></tbody></table></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Õpetajate koormus</h3><span class="muted">min / soov / max</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Õpetaja</th><th>Määratud</th><th>Vahemik</th><th>Seis</th></tr></thead><tbody id="dashTeachers"></tbody></table></div></section>
+      </div>
+      <div class="grid2 after">
+        <section class="panel card-section"><div class="section-title"><h3>Õppekava katvus</h3><span class="muted">nädalamalli perioodid</span></div><div class="table-wrap tall"><table class="data-table"><thead><tr><th>Rühm</th><th>Aine</th><th>Vaja</th><th>Paigas</th><th>Seis</th></tr></thead><tbody id="dashCoverage"></tbody></table></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Olulisemad probleemid</h3><span id="dashHardBadge" class="badge hard"></span></div><div id="dashIssues" class="issue-list"></div></section>
+      </div>
+      <section class="panel card-section after"><div class="section-title"><h3>Kalendri mõju</h3><span class="muted">vaheajad ja töövabad päevad</span></div><div id="calendarImpact"></div></section>
+    </section>
+
+    <section class="page" id="page-calendar">
+      <div class="page-head"><div><h2>Õppeaasta, tsüklid ja päevakava</h2><p>Kool määrab ise tsüklid, ajaslotid, vaheajad ja töövabad päevad.</p></div><button id="addCycleBtn" class="primary">+ Tsükkel</button></div>
+      <section class="panel form-card">
+        <div class="form-grid four"><label>Õppeaasta nimi<input id="yearName"></label><label>Algus<input id="yearStart" type="date"></label><label>Lõpp<input id="yearEnd" type="date"></label><label>Perioode päevas<input id="periodCount" type="number" min="1" max="12"></label></div>
+        <button id="saveYearBtn" class="primary">Salvesta</button>
+      </section>
+      <div class="grid2 align-start after">
+        <section class="panel card-section"><div class="section-title"><h3>Tsüklid</h3><span class="muted">arv ja pikkus on vabalt muudetav</span></div><div id="cyclesList" class="stack"></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Päeva ajavõrk</h3><button id="addPeriodBtn" class="soft">+ Periood</button></div><div id="periodsList" class="stack compact"></div></section>
+      </div>
+      <section class="panel card-section after"><div class="section-title"><h3>Koolivaheajad ja töövabad päevad</h3><button id="addClosureBtn" class="soft">+ Lisa</button></div><div id="closureEditor" class="inline-editor hidden"></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Tüüp</th><th>Nimetus</th><th>Algus</th><th>Lõpp</th><th></th></tr></thead><tbody id="closuresTable"></tbody></table></div></section>
+    </section>
+
+    <section class="page" id="page-entities">
+      <div class="page-head"><div><h2>Klassid, rühmad ja ained</h2><p>Õpperühm on tunniplaani põhiüksus; paralleelsusvõti seob samal ajal toimuvad rühmad.</p></div></div>
+      <div class="grid3 align-start">
+        <section class="panel card-section"><div class="section-title"><h3>Klassid</h3><button id="addClassBtn" class="soft">+ Klass</button></div><div id="classesList" class="stack compact"></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Ained</h3><button id="addSubjectBtn" class="soft">+ Aine</button></div><div id="subjectsList" class="stack compact"></div></section>
+        <section class="panel card-section"><div class="section-title"><h3>Õpperühmad</h3><button id="addGroupBtn" class="soft">+ Rühm</button></div><div class="table-wrap tall"><table class="data-table"><thead><tr><th>Rühm</th><th>Aine</th><th>Klassid</th><th>Õpilasi</th><th>Paralleel</th><th></th></tr></thead><tbody id="groupsTable"></tbody></table></div></section>
+      </div>
+      <section id="groupEditor" class="panel form-card after hidden"></section>
+    </section>
+
+    <section class="page" id="page-curriculum">
+      <div class="page-head"><div><h2>Õppekava & tunnipaketid</h2><p>Aastamaht, tsüklite nädalatunnid, plokkide jaotus ja tsüklisisesed toimumisnädalad.</p></div><button id="addRequirementBtn" class="primary">+ Nõue</button></div>
+      <section class="panel card-section"><div class="table-wrap wide"><table class="data-table"><thead id="curriculumHead"></thead><tbody id="curriculumBody"></tbody></table></div></section>
+      <section id="requirementEditor" class="panel form-card after hidden"></section>
+    </section>
+
+    <section class="page" id="page-teachers">
+      <div class="page-head"><div><h2>Õpetajad</h2><p>Pädevused, tsükliti koormus ja saadavuse hierarhia.</p></div><button id="addTeacherBtn" class="primary">+ Õpetaja</button></div>
+      <div class="grid-sidebar"><aside id="teacherList" class="panel list-panel"></aside><section id="teacherEditor" class="panel form-card"></section></div>
+    </section>
+
+    <section class="page" id="page-rooms">
+      <div class="page-head"><div><h2>Ruumid & hooned</h2><p>Mahutavus, ruumitüüp, eelistused, alternatiivid ja hoonetevaheline liikumine.</p></div><button id="addRoomBtn" class="primary">+ Ruum</button></div>
+      <div class="grid-sidebar"><aside id="roomList" class="panel list-panel"></aside><section id="roomEditor" class="panel form-card"></section></div>
+      <section class="panel card-section after"><div class="section-title"><h3>Ruumide päevavaade</h3><div class="inline-selects"><select id="roomCycleSelect"></select><select id="roomDaySelect"></select></div></div><div class="table-wrap wide"><table class="room-table"><thead><tr id="roomScheduleHead"></tr></thead><tbody id="roomScheduleBody"></tbody></table></div></section>
+    </section>
+
+    <section class="page" id="page-timerequests">
+      <div class="page-head"><div><h2>Ajapiirangud</h2><p>Sama ajavõrgu komponent töötab õpetaja, klassi, rühma, aine, ruumi või konkreetse nõude kohta.</p></div><button id="addTimeRequestBtn" class="primary">+ Ajapiirang</button></div>
+      <section class="panel form-card"><div class="form-grid four"><label>Objekti liik<select id="timeEntityType"><option value="teacher">Õpetaja</option><option value="class">Klass</option><option value="group">Rühm</option><option value="subject">Aine</option><option value="room">Ruum</option><option value="requirement">Õppekava nõue</option></select></label><label>Objekt<select id="timeEntityId"></select></label><label>Tase<select id="timeScope"><option value="year">Õppeaasta</option><option value="semester1">I poolaasta</option><option value="semester2">II poolaasta</option><option value="cycle">Valitud tsükkel</option></select></label><label>Tsükkel<select id="timeCycle"></select></label></div><div class="hint">Klõps: pärib/vaba → eelistatud → keelatud → pärib/vaba. Kõva reegli puhul on „keelatud“ absoluutne.</div><div id="genericTimeGrid" class="availability-grid"></div><button id="saveTimeRequestBtn" class="primary">Salvesta ajapiirang</button></section>
+    </section>
+
+    <section class="page" id="page-rules">
+      <div class="page-head"><div><h2>Reeglid & kaalud</h2><p>Õppealajuhataja saab otsustada, mis on kompromiss ja mis on absoluutne piirang.</p></div></div>
+      <section class="panel card-section"><div id="rulesTable"></div></section>
+      <section class="panel card-section after"><h3>Hindamise põhimõte</h3><p class="muted">Kõvad reeglid keelavad paigutuse. Pehmed reeglid annavad trahvi 0–5 kaaluga. Optimeerija võrdleb lubatud variante koguskoori järgi.</p></section>
+    </section>
+
+    <section class="page" id="page-builder">
+      <div class="page-head"><div><h2>Tunniplaani koostaja</h2><p>Raskeimad paketid paigutatakse esimesena; lohistamisel näidatakse sihtkoha sobivust enne drop'i.</p></div><div class="inline-actions"><select id="builderCycle"></select><select id="builderView"></select><select id="optimizeDepth"><option value="quick">Kiire</option><option value="better" selected>Parem</option><option value="deep">Põhjalik</option></select><button id="builderOptimizeBtn" class="primary">Koosta / optimeeri</button></div></div>
+      <div class="builder-tools panel"><div class="legend"><span>🔒 lukus</span><span class="hard-dot">võimatu</span><span class="warn-dot">lubatud, halb</span><span class="good-dot">hea</span><span class="best-dot">väga hea</span></div><div><span id="builderScore" class="score"></span> <span id="builderHard" class="badge hard"></span></div></div>
+      <div class="table-wrap wide panel schedule-wrap"><table class="schedule-table"><thead><tr id="scheduleHead"></tr></thead><tbody id="scheduleBody"></tbody></table></div>
+      <div class="grid2 after"><section class="panel card-section"><div class="section-title"><h3>Paigutamata paketid</h3><button id="diagnoseUnplacedBtn" class="soft">Selgita miks</button></div><div id="unplacedList" class="chip-list"></div></section><section class="panel card-section"><div class="section-title"><h3>Parandussoovitused</h3><button id="suggestMovesBtn" class="soft">Paku parandusi</button></div><div id="moveSuggestions" class="issue-list"></div></section></div>
+    </section>
+
+    <section class="page" id="page-diagnostics">
+      <div class="page-head"><div><h2>Diagnostika</h2><p>Mitte ainult „mis on katki“, vaid ka „miks“ ja millised muudatused annaksid lahendusele ruumi juurde.</p></div><button id="refreshDiagnosticsBtn" class="primary">Arvuta uuesti</button></div>
+      <div class="grid2"><section class="panel card-section"><div class="section-title"><h3>Konfliktid</h3><span id="diagHardCount" class="badge hard"></span></div><div id="diagnosticIssues" class="issue-list tall-list"></div></section><section class="panel card-section"><div class="section-title"><h3>Pudelikaelad</h3><span class="muted">väikseima valikuruumiga paketid</span></div><div id="bottlenecks" class="issue-list tall-list"></div></section></div>
+      <section class="panel card-section after"><div class="section-title"><h3>Paigutamata tundide põhjused</h3><span class="muted">õpetajad · ajad · ruumid · paralleelpaketid</span></div><div id="unplacedDiagnostics" class="issue-list"></div></section>
+    </section>
+
+    <section class="page" id="page-guide">
+      <div class="page-head"><div><h2>Õpetus</h2><p>Tööjärjekord õppealajuhatajale.</p></div></div>
+      <div class="guide-grid">
+        <section class="panel card-section"><h3>1. Kalender</h3><p>Määra õppeaasta, tsüklid, päris tunniajad, koolivaheajad ja töövabad päevad.</p></section>
+        <section class="panel card-section"><h3>2. Klassid, rühmad ja ained</h3><p>Rühm võib sisaldada ühe või mitme klassi õpilasi. Sama paralleelsusvõtmega rühmad toimuvad samal ajal.</p></section>
+        <section class="panel card-section"><h3>3. Õppekava</h3><p>Sisesta aastamaht ja tsüklite nädalatunnid. Vali plokijaotus ning vajadusel tsüklisisesed toimumisnädalad.</p></section>
+        <section class="panel card-section"><h3>4. Õpetajad ja ruumid</h3><p>Määra pädevused, koormus, ruumide mahutavus, hooned ja eelistatud/alternatiivsed ruumid.</p></section>
+        <section class="panel card-section"><h3>5. Ajapiirangud</h3><p>Märgi õpetaja, klassi, rühma, aine, ruumi või konkreetse tunni keelatud ja eelistatud ajad.</p></section>
+        <section class="panel card-section"><h3>6. Reeglid & kaalud</h3><p>Otsusta, millised nõuded on kõvad ja milliste puhul võib solver teha kompromissi.</p></section>
+        <section class="panel card-section"><h3>7. Optimeeri</h3><p>Kasuta kiiret, paremat või põhjalikku otsingut. Solver alustab kõige väiksema valikuruumiga paketist.</p></section>
+        <section class="panel card-section"><h3>8. Paranda käsitsi</h3><p>Lohistades näed sihtkoha sobivust enne drop'i. Lukusta head lahendused, kasuta Undo/Redo ja parandussoovitusi.</p></section>
+        <section class="panel card-section"><h3>9. Diagnostika</h3><p>Vaata, miks mõni pakett ei mahu: kas puudub õpetaja, ühine aeg, sobiv ruum või on piirang liiga tugev.</p></section>
+        <section class="panel card-section"><h3>10. Failiga jätkamine</h3><p>Laadi kogu projekt JSON-failina alla ja impordi see hiljem või teises arvutis. Kontosid pole vaja.</p></section>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="core-base.js"></script>
+<script src="core-model.js"></script>
+<script src="core-rules.js"></script>
+<script src="core-solver.js"></script>
+<script src="ui-overview.js"></script>
+<script src="ui-curriculum.js"></script>
+<script src="ui-people.js"></script>
+<script src="ui-schedule.js"></script>
+<script src="ui-app.js"></script>
+</body>
+</html>
